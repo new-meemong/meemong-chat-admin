@@ -1,0 +1,6 @@
+export const PRODUCTION_API = "https://job-api.meemong.com";
+export const WEBVIEW_API_KEY =
+  "$2b$10$93M3ylHjy9eC0dTahDLxR.ZGDRyRvJEiq44XiFppovFht.nBRe4p.";
+
+export const jwt =
+  "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2pvYi1hcGkubWVlbW9uZy5jb20iLCJpYXQiOjE3NDkxMDc5NTAsInR5cGUiOiJDTElFTlRfQVBQX1VTRVIiLCJpc0RldkRhdGFiYXNlIjpmYWxzZSwiYXBwSWRlbnRpZmllcklkIjpudWxsLCJ1c2VySWQiOjM5NzM1LCJleHAiOjE3NTY4ODM5NTB9.LyAsLURm4MMrHPT2wJWdNWJrFfOzeqcaPqZACgZqjz0";

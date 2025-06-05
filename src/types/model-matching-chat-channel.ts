@@ -1,4 +1,6 @@
+import { ModelMatchingChatMessage } from "./model-matching-chat-message";
 import { Timestamp } from "firebase/firestore";
+import { User } from "./user";
 
 export interface ModelMatchingChatChannel {
   id: string; // 채널 문서 ID (Firestore 문서 ID)
@@ -9,21 +11,6 @@ export interface ModelMatchingChatChannel {
   updatedAt: Timestamp; // 마지막 업데이트 시간
   // 이하 하위 컬렉션(messages) 등 다른 필드 생략
 
-  users: {
-    id: string;
-    displayName: string;
-    fcmToken: string;
-    // profilePictureURL: string;
-    Role: number;
-    profileUrl: string;
-    sex: string;
-  }[];
-  lastMessage: {
-    id: string;
-    message: string;
-    messageType: string;
-    senderId: string;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
-  };
+  users: User[];
+  lastMessage: ModelMatchingChatMessage | null;
 }

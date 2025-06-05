@@ -1,3 +1,9 @@
+import ModelMatchingLatestChatList from "@/components/model-matching-latest-chat-channels";
+
 export default function Home() {
-  return <div>Hello World</div>;
+  return (
+    <div>
+      <ModelMatchingLatestChatList />
+    </div>
+  );
 }

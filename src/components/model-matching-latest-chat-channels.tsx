@@ -2,10 +2,13 @@
 
 "use client";
 
-import { Loader2, MessageSquare } from "lucide-react";
+import "moment/locale/ko";
 
-import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
+
 import React from "react";
+import moment from "moment";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
 
 const ModelMatchingLatestChatList: React.FC = () => {
@@ -38,17 +41,64 @@ const ModelMatchingLatestChatList: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {data.map((channel) => (
-        <Card
-          key={channel.id}
-          className="flex items-center p-4 hover:bg-gray-50 transition cursor-pointer"
-          onClick={() => {
-            // TODO: 채팅방으로 이동하는 로직 (예: 라우터 push)
-            // 예시: router.push(`/chat/${channel.id}`);
-          }}
-        ></Card>
-      ))}
+    <div className="space-y-2">
+      {data.map((channel) => {
+        const users = channel.users.slice(0, 2); // 최대 2명
+        const lastMsg = channel.lastMessage;
+        // 시간 포맷: 오전/오후 12:34
+        let timeStr = "";
+        if (lastMsg?.createdAt) {
+          const date = lastMsg.createdAt.toDate
+            ? lastMsg.createdAt.toDate()
+            : lastMsg.createdAt;
+          timeStr = moment(date).locale("ko").format("A h:mm");
+        }
+        console.log("moonsae users", users);
+        return (
+          <div
+            key={channel.id}
+            className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+          >
+            {/* 왼쪽: 유저 프로필 */}
+            <div className="flex flex-col items-center min-w-[60px] mr-4">
+              <div className="flex -space-x-2">
+                {users.map((user) => (
+                  <div key={user.id} className="flex flex-col items-center">
+                    <Avatar className="border-2 border-white shadow-sm size-20">
+                      {user.profileUrl ? (
+                        <AvatarImage
+                          src={user.profileUrl}
+                          alt={user.displayName}
+                          className="object-cover"
+                        />
+                      ) : null}
+                      <AvatarFallback>
+                        {user.profileUrl ? (
+                          user.displayName?.[0] || "null"
+                        ) : (
+                          <UserIcon className="w-5 h-5 text-gray-400" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-gray-700 max-w-[80px] truncate text-center mt-1">
+                      {user.displayName}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* 오른쪽: 메시지/시간 */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              <div className="text-sm text-gray-900 font-medium break-words line-clamp-2 max-h-[2.8em]">
+                {lastMsg?.message || (
+                  <span className="text-gray-400">메시지가 없습니다</span>
+                )}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">{timeStr}</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
