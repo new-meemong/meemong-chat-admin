@@ -53,6 +53,16 @@ const ModelMatchingLatestChatList: React.FC = () => {
       {data.map((channel) => {
         const users = channel.users.slice(0, 2); // 최대 2명
         const lastMsg = channel.lastMessage;
+
+        // 채널을 연 유저 찾기
+        const openUser = channel.users.find(
+          (u) => u.id === channel.channelOpenUserId
+        );
+
+        let openLabel = null;
+        if (openUser?.role === 1) openLabel = "모델이 대화시작";
+        else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
+
         // 시간 포맷: 오전/오후 12:34
         let timeStr = "";
         if (lastMsg?.createdAt) {
@@ -109,6 +119,20 @@ const ModelMatchingLatestChatList: React.FC = () => {
             </div>
             {/* 오른쪽: 메시지/시간 */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
+              {/* 라벨 추가 */}
+              {openLabel && (
+                <div
+                  className={`text-xs font-semibold text-white rounded px-2 py-0.5 mb-1 w-fit ${
+                    openUser?.role === 1
+                      ? "bg-blue-400"
+                      : openUser?.role === 2
+                      ? "bg-purple-500"
+                      : "bg-gray-400"
+                  }`}
+                >
+                  {openLabel}
+                </div>
+              )}
               <div className="text-sm text-gray-900 font-medium break-words line-clamp-2 max-h-[2.8em]">
                 {lastMsg?.message || (
                   <span className="text-gray-400">메시지가 없습니다</span>

@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number;
   DisplayName: string;
   FcmToken: string;
   // profilePictureURL: string;

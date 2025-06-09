@@ -1,6 +1,6 @@
 import { apiFetch } from "../fetch";
 
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: number) => {
   try {
     const response = await apiFetch(`/api/v1/users/${userId}`, "GET");
     return response.data;

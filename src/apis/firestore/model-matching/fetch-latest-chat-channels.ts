@@ -30,25 +30,20 @@ export async function fetchLatestChatChannels(): Promise<
   // 3) 쿼리 실행 (getDocs)
   const snapshot = await getDocs(q);
 
-  let index = 0;
   // 4) 문서 스냅샷을 비동기로 순회하며, lastMessage도 함께 조회
   const channelsWithLastMsg = await Promise.all(
     snapshot.docs.map(async (doc) => {
-      console.log("moonsae index", index);
-      index++;
       const data = doc.data() as DocumentData;
       const channelId = doc.id;
-      const participantsIds: string[] = data.participantsIds;
+      const participantsIds: number[] = data.participantsIds;
 
       // participantsIds에서 'system' 제외
       const filteredParticipantsIds = participantsIds.filter(
-        (userId) => userId !== "system"
+        (userId) => String(userId) !== "system"
       );
-      console.log("moonsae filtered", filteredParticipantsIds);
       // filteredParticipantsIds로 users 정보 모두 가져오기
       const users = await Promise.all(
-        filteredParticipantsIds.map(async (userId: string) => {
-          console.log("moonsae userId", userId);
+        filteredParticipantsIds.map(async (userId: number) => {
           return await getUser(userId);
         })
       );
@@ -89,7 +84,7 @@ export async function fetchLatestChatChannels(): Promise<
         id: channelId,
         channelKey: data.channelKey,
         participantsIds: filteredParticipantsIds,
-        channelOpenUserId: data.channelOpenUserId,
+        channelOpenUserId: Number(data.channelOpenUserId),
         createdAt: data.createdAt as Timestamp,
         updatedAt: data.updatedAt as Timestamp,
         // 필요하다면 추가 필드(unreadCount, otherUser 등)를 여기에 포함
