@@ -20,15 +20,7 @@ const SideNavigation = () => {
             href="/users"
             className="block p-2 rounded hover:bg-gray-200 transition-colors"
           >
-            사용자 관리
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/settings"
-            className="block p-2 rounded hover:bg-gray-200 transition-colors"
-          >
-            설정
+            채팅 데이터
           </Link>
         </li>
       </ul>

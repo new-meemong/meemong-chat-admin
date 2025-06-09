@@ -89,7 +89,15 @@ const ModelMatchingLatestChatList: React.FC = () => {
                         )}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-[14px] text-gray-700 max-w-[80px] truncate text-center mt-1">
+                    <span
+                      className={`text-[14px] text-center mt-1 break-words ${
+                        user.role === 1
+                          ? "text-blue-500"
+                          : user.role === 2
+                          ? "text-purple-500"
+                          : "text-gray-700"
+                      }`}
+                    >
                       {user.DisplayName}
                     </span>
                     <span className="text-[14px] text-gray-500 max-w-[80px] truncate text-center">

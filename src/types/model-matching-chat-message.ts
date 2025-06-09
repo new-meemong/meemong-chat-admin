@@ -5,7 +5,7 @@ export interface ModelMatchingChatMessage {
   id: string;
   message: string;
   messageType: string;
-  senderId: string;
+  senderId: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   user: User | null;

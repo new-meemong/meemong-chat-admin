@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import type { Metadata } from "next";
 import Providers from "./providers";
-import SideNavigation from "@/components/SideNavigation";
+import SideNavigation from "@/components/side-navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

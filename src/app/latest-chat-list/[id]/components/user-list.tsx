@@ -12,7 +12,13 @@ export default function UserList({ users }: UserListProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">참여자 목록:</h2>
-      <div className="space-y-2">
+      <div
+        className={
+          users.length === 2
+            ? "flex flex-row space-x-4"
+            : "space-y-2 flex flex-col"
+        }
+      >
         {users.map((user) => (
           <div key={user.id} className="flex items-center space-x-2">
             <Avatar
@@ -51,10 +57,18 @@ export default function UserList({ users }: UserListProps) {
               <AvatarFallback></AvatarFallback>
             </Avatar>
 
-            <span className="text-[16px] text-gray-700 max-w-[80px] truncate text-center">
+            <span
+              className={`text-[16px] break-words ${
+                user.role === 1
+                  ? "text-blue-500"
+                  : user.role === 2
+                  ? "text-purple-500"
+                  : "text-gray-700"
+              }`}
+            >
               {user.DisplayName || "이름 없음"}
             </span>
-            <span className="text-[16px] text-gray-500 max-w-[80px] truncate text-center ml-2">
+            <span className="text-[16px] text-gray-500 max-w-[80px] truncate text-center">
               ({user.id})
             </span>
           </div>
