@@ -7,19 +7,35 @@ import "moment/locale/ko";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
+import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
 import React from "react";
 import { User } from "@/types/user";
 import moment from "moment";
+import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
 import { useRouter } from "next/navigation";
 
 const ModelMatchingLatestChatList: React.FC = () => {
   const router = useRouter();
   const { data, isLoading, error } = useLatestChatChannels();
+  const setChannelInfo = useCurrentChannelStore(
+    (state) => state.setChannelInfo
+  );
+  const clearChannelInfo = useCurrentChannelStore(
+    (state) => state.clearChannelInfo
+  );
 
-  const handleChannelClick = (channelId: string, users: User[]) => {
-    const usersData = encodeURIComponent(JSON.stringify(users));
-    router.push(`/latest-chat-list/${channelId}?users=${usersData}`);
+  const handleChannelClick = (
+    channel: ModelMatchingChatChannel,
+    users: User[]
+  ) => {
+    clearChannelInfo();
+    // openUser 계산
+    const openUser: User | undefined = channel.users.find(
+      (u: User) => u.id === channel.channelOpenUserId
+    );
+    setChannelInfo(channel, users, openUser ?? null);
+    router.push(`/latest-chat-list/${channel.id}`);
   };
 
   if (isLoading) {
@@ -55,8 +71,8 @@ const ModelMatchingLatestChatList: React.FC = () => {
         const lastMsg = channel.lastMessage;
 
         // 채널을 연 유저 찾기
-        const openUser = channel.users.find(
-          (u) => u.id === channel.channelOpenUserId
+        const openUser: User | undefined = channel.users.find(
+          (u: User) => u.id === channel.channelOpenUserId
         );
 
         let openLabel = null;
@@ -76,7 +92,7 @@ const ModelMatchingLatestChatList: React.FC = () => {
           <div
             key={channel.id}
             className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => handleChannelClick(channel.id, channel.users)}
+            onClick={() => handleChannelClick(channel, channel.users)}
           >
             {/* 왼쪽: 유저 프로필 */}
             <div className="flex flex-col items-center min-w-[60px] mr-4">
