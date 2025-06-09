@@ -53,10 +53,10 @@ export async function fetchChatMessages(
       message: data.message,
       messageType: data.messageType as ChatMessageTypeEnum,
       metaPathList: data.metaPathList || [],
-      senderId: data.senderId,
+      senderId: Number(data.senderId),
       createdAt: data.createdAt as Timestamp,
       updatedAt: data.updatedAt as Timestamp,
-      user: users.find((user) => user.id === data.senderId) || null
+      user: users.find((user) => user.id === Number(data.senderId)) || null
     };
   });
 
