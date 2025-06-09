@@ -1,9 +1,9 @@
 export interface User {
   id: string;
-  displayName: string;
-  fcmToken: string;
+  DisplayName: string;
+  FcmToken: string;
   // profilePictureURL: string;
-  Role: number;
+  role: number;
   profileUrl: string;
   sex: string;
 }

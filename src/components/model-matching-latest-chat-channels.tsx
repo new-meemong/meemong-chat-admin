@@ -8,11 +8,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
 import React from "react";
+import { User } from "@/types/user";
 import moment from "moment";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
+import { useRouter } from "next/navigation";
 
 const ModelMatchingLatestChatList: React.FC = () => {
+  const router = useRouter();
   const { data, isLoading, error } = useLatestChatChannels();
+
+  const handleChannelClick = (channelId: string, users: User[]) => {
+    const usersData = encodeURIComponent(JSON.stringify(users));
+    router.push(`/latest-chat-list/${channelId}?users=${usersData}`);
+  };
 
   if (isLoading) {
     return (
@@ -53,11 +61,12 @@ const ModelMatchingLatestChatList: React.FC = () => {
             : lastMsg.createdAt;
           timeStr = moment(date).locale("ko").format("A h:mm");
         }
-        console.log("moonsae users", users);
+
         return (
           <div
             key={channel.id}
             className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+            onClick={() => handleChannelClick(channel.id, channel.users)}
           >
             {/* 왼쪽: 유저 프로필 */}
             <div className="flex flex-col items-center min-w-[60px] mr-4">
@@ -68,20 +77,23 @@ const ModelMatchingLatestChatList: React.FC = () => {
                       {user.profileUrl ? (
                         <AvatarImage
                           src={user.profileUrl}
-                          alt={user.displayName}
+                          alt={user.DisplayName}
                           className="object-cover"
                         />
                       ) : null}
                       <AvatarFallback>
                         {user.profileUrl ? (
-                          user.displayName?.[0] || "null"
+                          user.DisplayName?.[0] || "null"
                         ) : (
                           <UserIcon className="w-5 h-5 text-gray-400" />
                         )}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-xs text-gray-700 max-w-[80px] truncate text-center mt-1">
-                      {user.displayName}
+                    <span className="text-[14px] text-gray-700 max-w-[80px] truncate text-center mt-1">
+                      {user.DisplayName}
+                    </span>
+                    <span className="text-[14px] text-gray-500 max-w-[80px] truncate text-center">
+                      ({user.id})
                     </span>
                   </div>
                 ))}
