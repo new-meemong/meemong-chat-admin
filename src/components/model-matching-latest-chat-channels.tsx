@@ -137,16 +137,25 @@ const ModelMatchingLatestChatList: React.FC = () => {
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               {/* 라벨 추가 */}
               {openLabel && (
-                <div
-                  className={`text-xs font-semibold text-white rounded px-2 py-0.5 mb-1 w-fit ${
-                    openUser?.role === 1
-                      ? "bg-blue-400"
-                      : openUser?.role === 2
-                      ? "bg-purple-500"
-                      : "bg-gray-400"
-                  }`}
-                >
-                  {openLabel}
+                <div className="flex items-center gap-2 mb-1">
+                  <div
+                    className={`text-xs font-semibold text-white rounded px-2 py-0.5 w-fit ${
+                      openUser?.role === 1
+                        ? "bg-blue-400"
+                        : openUser?.role === 2
+                        ? "bg-purple-500"
+                        : "bg-gray-400"
+                    }`}
+                  >
+                    {openLabel}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    주고받은 메시지수{" "}
+                    <span className="font-bold text-black">
+                      {channel.messageCount}
+                    </span>
+                    개
+                  </div>
                 </div>
               )}
               <div className="text-sm text-gray-900 font-medium break-words line-clamp-2 max-h-[2.8em]">

@@ -13,4 +13,5 @@ export interface ModelMatchingChatChannel {
 
   users: User[];
   lastMessage: ModelMatchingChatMessage | null;
+  messageCount: number;
 }

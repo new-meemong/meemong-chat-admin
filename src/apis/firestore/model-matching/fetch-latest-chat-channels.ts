@@ -25,7 +25,7 @@ export async function fetchLatestChatChannels(): Promise<
   const chatChannelsCol = collection(db, "modelMatchingChatChannels");
 
   // 2) 쿼리: updatedAt 내림차순, 최대 100개
-  const q = query(chatChannelsCol, orderBy("updatedAt", "desc"), limit(10));
+  const q = query(chatChannelsCol, orderBy("updatedAt", "desc"), limit(100));
 
   // 3) 쿼리 실행 (getDocs)
   const snapshot = await getDocs(q);
@@ -62,6 +62,10 @@ export async function fetchLatestChatChannels(): Promise<
       );
       const msgSnap = await getDocs(msgQuery);
 
+      // 전체 메시지 개수 카운트
+      const allMsgsSnap = await getDocs(messagesCol);
+      const messageCount = allMsgsSnap.size;
+
       let lastMessage: ModelMatchingChatMessage | null = null;
       if (!msgSnap.empty) {
         const msgData = msgSnap.docs[0].data();
@@ -89,7 +93,8 @@ export async function fetchLatestChatChannels(): Promise<
         updatedAt: data.updatedAt as Timestamp,
         // 필요하다면 추가 필드(unreadCount, otherUser 등)를 여기에 포함
         lastMessage,
-        users
+        users,
+        messageCount
       };
     })
   );
