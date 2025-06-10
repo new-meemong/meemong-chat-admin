@@ -30,7 +30,17 @@ export const apiFetch = async (url: string, method: string, body?: any) => {
       body: JSON.stringify(body)
     });
     if (!response.ok) {
-      throw new Error("API fetch failed");
+      let errorMessage = "API fetch failed";
+      try {
+        const errorData = await response.json();
+        console.log("moonsae errorData", errorData);
+        errorMessage =
+          errorData?.toastMessage || JSON.stringify(errorData) || errorMessage;
+      } catch {
+        // JSON 파싱 실패 시 무시
+      }
+      console.error("[apiFetch] error", errorMessage);
+      return undefined;
     }
     const responseData = await response.json();
     console.log("=== API Response ===");

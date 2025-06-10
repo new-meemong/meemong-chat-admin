@@ -42,11 +42,21 @@ export async function fetchLatestChatChannels(): Promise<
         (userId) => String(userId) !== "system"
       );
       // filteredParticipantsIds로 users 정보 모두 가져오기
-      const users = await Promise.all(
+      let users = await Promise.all(
         filteredParticipantsIds.map(async (userId: number) => {
-          return await getUser(userId);
+          try {
+            return await getUser(userId);
+          } catch (e) {
+            console.warn(
+              `[fetchLatestChatChannels] getUser failed for ${userId}`,
+              e
+            );
+            return null;
+          }
         })
       );
+      // users에서 null 값 제거
+      users = users.filter((user) => user !== null);
 
       // ─── 추가: messages 서브컬렉션에서 마지막 메시지 조회 ───
       const messagesCol = collection(
