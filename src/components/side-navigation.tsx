@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 const SideNavigation = () => {
@@ -15,14 +17,14 @@ const SideNavigation = () => {
             최근 대화 목록(100개)
           </Link>
         </li>
-        <li>
+        {/* <li>
           <Link
-            href="/users"
+            href="/daily-count"
             className="block p-2 rounded hover:bg-gray-200 transition-colors"
           >
-            채팅 데이터
+            일별 채팅방 생성
           </Link>
-        </li>
+        </li> */}
       </ul>
     </nav>
   );
