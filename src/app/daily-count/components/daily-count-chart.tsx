@@ -78,7 +78,7 @@ export default function DailyCountChart() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {queryRange.start} ~ {queryRange.end} Daily Count
+            {queryRange.start} ~ {queryRange.end} 일자별 생성된 채팅방 수
           </CardTitle>
         </CardHeader>
         <CardContent>
