@@ -1,8 +1,13 @@
 import {
   Timestamp,
   collection,
+  doc,
+  getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
+  setDoc,
   where
 } from "firebase/firestore";
 
@@ -32,5 +37,62 @@ export async function countChatChannelsByDate(
   );
 
   const snapshot = await getDocs(q);
+
+  // dailyCreatedChannels 문서 생성/업데이트
+  const dailyDocRef = doc(db, "modelMatchingDailyCount", dateString);
+  const dailyDocSnap = await getDoc(dailyDocRef);
+  if (!dailyDocSnap.exists()) {
+    await setDoc(dailyDocRef, {
+      dailyTotalCount: snapshot.size,
+      createdAt: Timestamp.now(),
+      baseDate: dateString
+    });
+  }
+
   return snapshot.size;
+}
+
+/**
+ * modelMatchingDailyCount의 baseDate가 가장 최신인 데이터를 찾고,
+ * 그 다음날부터 어제까지의 각 날짜별로 countChatChannelsByDate를 호출해 setDoc을 생성합니다.
+ */
+export async function countChatChannels(): Promise<void> {
+  // 1. 최신 baseDate 구하기 (내림차순 정렬, 1개 limit)
+  const dailyCountCol = collection(db, "modelMatchingDailyCount");
+  const q = query(dailyCountCol, orderBy("baseDate", "desc"), limit(1));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    throw new Error(
+      "modelMatchingDailyCount에 데이터가 없습니다. 최소 1개는 필요합니다."
+    );
+  }
+  const latestDoc = snapshot.docs[0];
+  const latestBaseDate = latestDoc.data().baseDate; // 예: "2025-06-05"
+
+  // 2. 어제 날짜 구하기 (UTC 기준)
+  const today = new Date();
+  const yesterday = new Date(
+    Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate() - 1
+    )
+  );
+
+  // 3. 최신 baseDate 다음날부터 어제까지의 날짜 리스트 생성
+  const dates: string[] = [];
+  const d = new Date(latestBaseDate + "T00:00:00.000Z");
+  d.setUTCDate(d.getUTCDate() + 1); // 다음날부터 시작
+  while (d <= yesterday) {
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    dates.push(`${yyyy}-${mm}-${dd}`);
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+
+  // 4. 각 날짜별로 countChatChannelsByDate 호출
+  for (const dateString of dates) {
+    await countChatChannelsByDate(dateString);
+  }
 }

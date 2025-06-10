@@ -17,14 +17,14 @@ const SideNavigation = () => {
             최근 대화 목록(100개)
           </Link>
         </li>
-        {/* <li>
+        <li>
           <Link
             href="/daily-count"
             className="block p-2 rounded hover:bg-gray-200 transition-colors"
           >
-            일별 채팅방 생성
+            채팅방 데이터
           </Link>
-        </li> */}
+        </li>
       </ul>
     </nav>
   );
