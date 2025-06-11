@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
-import { useNewChannelDailyCountQuery } from "@/hooks/use-new-channel-daily-count-query";
+import { useDailyActiveChatChannelsCountQuery } from "@/hooks/use-active-channel-daily-count-query";
 import { useState } from "react";
 
-export default function PostDayCountButton() {
+export default function PostActiveChannelDayCountButton() {
   const [date, setDate] = useState("");
   const [queryDate, setQueryDate] = useState("");
   const { data, isLoading, isError, error } =
-    useNewChannelDailyCountQuery(queryDate);
+    useDailyActiveChatChannelsCountQuery(queryDate);
 
   const handleClick = () => {
     setQueryDate(date);

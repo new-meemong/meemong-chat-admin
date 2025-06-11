@@ -18,7 +18,7 @@ import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { TrendingUp } from "lucide-react";
-import { useCountChatChannels } from "@/hooks/use-count-chat-channels-query";
+import { useCountDailyNewChatChannels } from "@/hooks/use-count-chat-channels-query";
 import { useDailyCountListQuery } from "@/hooks/use-daily-count-list-query";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,19 +54,30 @@ export default function DailyCountChart() {
   const chartConfig: ChartConfig = {
     dailyTotalCount: {
       label: "생성된 채팅방 수",
-      color: "var(--chart-1)"
+      color: "#FF4D4F"
+    },
+    dailyTotalActiveCount: {
+      label: "활성 채팅방 수",
+      color: "#1E90FF"
+    },
+    dailyDiffCount: {
+      label: "차이(활성-생성)",
+      color: "#FFD700"
     }
   };
 
   const chartData = (listData || []).map((item) => ({
     date: item.baseDate,
-    dailyTotalCount: item.dailyTotalCount
+    dailyTotalCount: item.dailyTotalCount ?? 0,
+    dailyTotalActiveCount: item.dailyTotalActiveCount ?? 0,
+    dailyDiffCount:
+      (item.dailyTotalActiveCount ?? 0) - (item.dailyTotalCount ?? 0)
   }));
 
   const queryClient = useQueryClient();
   // useLatestChatChannels 훅을 호출하여 쿼리 등록 (데이터는 사용하지 않음)
   useLatestChatChannels();
-  const mutation = useCountChatChannels();
+  const mutation = useCountDailyNewChatChannels();
 
   return (
     <div>
@@ -172,9 +183,23 @@ export default function DailyCountChart() {
                     <Area
                       dataKey="dailyTotalCount"
                       type="natural"
-                      fill="var(--chart-1)"
+                      fill="#FF4D4F"
                       fillOpacity={0.4}
-                      stroke="var(--chart-1)"
+                      stroke="#FF4D4F"
+                    />
+                    <Area
+                      dataKey="dailyTotalActiveCount"
+                      type="natural"
+                      fill="#1E90FF"
+                      fillOpacity={0.4}
+                      stroke="#1E90FF"
+                    />
+                    <Area
+                      dataKey="dailyDiffCount"
+                      type="natural"
+                      fill="#FFD700"
+                      fillOpacity={0.4}
+                      stroke="#FFD700"
                     />
                   </AreaChart>
                 ) : (
@@ -203,7 +228,17 @@ export default function DailyCountChart() {
                     />
                     <Bar
                       dataKey="dailyTotalCount"
-                      fill="var(--chart-1)"
+                      fill="#FF4D4F"
+                      fillOpacity={0.7}
+                    />
+                    <Bar
+                      dataKey="dailyTotalActiveCount"
+                      fill="#1E90FF"
+                      fillOpacity={0.7}
+                    />
+                    <Bar
+                      dataKey="dailyDiffCount"
+                      fill="#FFD700"
                       fillOpacity={0.7}
                     />
                   </BarChart>

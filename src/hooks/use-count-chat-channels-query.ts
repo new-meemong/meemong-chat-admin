@@ -1,12 +1,12 @@
-import { countChatChannels } from "@/apis/firestore/model-matching/post-daily-count";
+import { countDailyNewChatChannels } from "@/apis/firestore/model-matching/post-new-channel-daily-count";
 import { useMutation } from "@tanstack/react-query";
 
 /**
  * modelMatchingDailyCount의 baseDate 이후 ~ 어제까지의 daily count를 갱신하는 훅
  */
-export function useCountChatChannels() {
+export function useCountDailyNewChatChannels() {
   const mutation = useMutation<void, Error>({
-    mutationFn: countChatChannels
+    mutationFn: countDailyNewChatChannels
   });
 
   return mutation;

@@ -5,6 +5,7 @@ interface DailyCountItem {
   id: string;
   dailyTotalCount: number;
   baseDate: string;
+  dailyTotalActiveCount: number;
 }
 
 interface UseDailyCountListQueryResult {

@@ -10,7 +10,14 @@ import { db } from "@/lib/firebase";
 export async function getDailyCountsByPeriod(
   startDate: string,
   endDate: string
-): Promise<{ id: string; dailyTotalCount: number; baseDate: string }[]> {
+): Promise<
+  {
+    id: string;
+    dailyTotalCount: number;
+    dailyTotalActiveCount: number;
+    baseDate: string;
+  }[]
+> {
   // baseDate 기준 범위 쿼리 및 오름차순 정렬
   const dailyCountCol = collection(db, "modelMatchingDailyCount");
   const q = query(
@@ -24,6 +31,7 @@ export async function getDailyCountsByPeriod(
   return snapshot.docs.map((doc) => ({
     id: doc.id,
     dailyTotalCount: doc.data().dailyTotalCount ?? 0,
+    dailyTotalActiveCount: doc.data().dailyTotalActiveCount ?? 0,
     baseDate: doc.data().baseDate
   }));
 }

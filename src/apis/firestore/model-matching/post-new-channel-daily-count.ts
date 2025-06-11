@@ -11,13 +11,14 @@ import {
   where
 } from "firebase/firestore";
 
+import { countDailyActiveChatChannelsByDate } from "./post-active-channel-daily-count";
 import { db } from "@/lib/firebase";
 
 /**
  * 주어진 날짜(YYYY-MM-DD)에 생성된 채팅방의 수를 반환합니다.
  * @param dateString 예: "2025-06-01"
  */
-export async function countChatChannelsByDate(
+export async function countDailyNewChatChannelsByDate(
   dateString: string
 ): Promise<number> {
   // 입력받은 날짜의 00:00:00 ~ 23:59:59 범위 계산
@@ -56,7 +57,7 @@ export async function countChatChannelsByDate(
  * modelMatchingDailyCount의 baseDate가 가장 최신인 데이터를 찾고,
  * 그 다음날부터 어제까지의 각 날짜별로 countChatChannelsByDate를 호출해 setDoc을 생성합니다.
  */
-export async function countChatChannels(): Promise<void> {
+export async function countDailyNewChatChannels(): Promise<void> {
   // 1. 최신 baseDate 구하기 (내림차순 정렬, 1개 limit)
   const dailyCountCol = collection(db, "modelMatchingDailyCount");
   const q = query(dailyCountCol, orderBy("baseDate", "desc"), limit(1));
@@ -93,6 +94,7 @@ export async function countChatChannels(): Promise<void> {
 
   // 4. 각 날짜별로 countChatChannelsByDate 호출
   for (const dateString of dates) {
-    await countChatChannelsByDate(dateString);
+    await countDailyNewChatChannelsByDate(dateString);
+    await countDailyActiveChatChannelsByDate(dateString);
   }
 }
