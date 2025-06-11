@@ -86,7 +86,7 @@ export default function DailyCountChart() {
         가져옵니다. 데이터는 25-05-07부터 어제까지의 데이터를 가져올 수
         있습니다.
       </div>
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>
             {queryRange.start} ~ {queryRange.end} 일자별 생성된 채팅방 수
@@ -155,7 +155,7 @@ export default function DailyCountChart() {
           {error && <div>에러: {error.message}</div>}
           {!isLoading && !error && chartData && (
             <div className="w-full">
-              <ChartContainer config={chartConfig} className="w-full">
+              <ChartContainer config={chartConfig} className="w-full h-[60vh]">
                 {chartType === "area" ? (
                   <AreaChart
                     width={400}
