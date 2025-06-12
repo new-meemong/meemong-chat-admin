@@ -126,6 +126,19 @@ const ModelMatchingLatestChatList: React.FC = () => {
                       {user.DisplayName}
                     </span>
                     <span className="md:text-[14px] text-gray-500 md:max-w-[80px] truncate text-center">
+                      {user.createdAt
+                        ? (() => {
+                            const d = new Date(user.createdAt);
+                            return `${String(d.getFullYear()).slice(
+                              2
+                            )}.${String(d.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            )}.${String(d.getDate()).padStart(2, "0")}`;
+                          })()
+                        : "생성일 없음"}
+                    </span>
+                    <span className="md:text-[13px] text-gray-400 text-center">
                       ({user.id})
                     </span>
                   </div>

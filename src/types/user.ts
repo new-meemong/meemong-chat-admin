@@ -6,4 +6,5 @@ export interface User {
   role: number;
   profileUrl: string;
   sex: string;
+  createdAt: string;
 }

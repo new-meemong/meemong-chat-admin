@@ -68,21 +68,40 @@ export default function UserList({ users }: UserListProps) {
               ) : null}
               <AvatarFallback></AvatarFallback>
             </Avatar>
-
-            <span
-              className={`text-[14px] md:text-[16px] break-words ${
-                user.role === 1
-                  ? "text-blue-500"
-                  : user.role === 2
-                  ? "text-purple-500"
-                  : "text-gray-700"
-              }`}
-            >
-              {user.DisplayName || "이름 없음"}
-            </span>
-            <span className="text-[14px] md:text-[16px] text-gray-500 max-w-[80px] truncate text-center">
-              ({user.id})
-            </span>
+            <div className="flex flex-col">
+              <span
+                className={`text-[14px] md:text-[16px] break-words ${
+                  user.role === 1
+                    ? "text-blue-500"
+                    : user.role === 2
+                    ? "text-purple-500"
+                    : "text-gray-700"
+                } text-left`}
+              >
+                {user.DisplayName || "이름 없음"}
+              </span>
+              {/* 생성일 */}
+              <span className="text-[14px] md:text-[16px] text-gray-500 max-w-[80px] truncate text-left">
+                {user.createdAt
+                  ? (() => {
+                      const d = new Date(user.createdAt);
+                      return `${String(d.getFullYear()).slice(2)}.${String(
+                        d.getMonth() + 1
+                      ).padStart(2, "0")}.${String(d.getDate()).padStart(
+                        2,
+                        "0"
+                      )}`;
+                    })()
+                  : "생성일 없음"}
+              </span>
+              {/* 아이디 */}
+              <span className="block md:hidden text-[13px] text-gray-400 max-w-[80px] truncate text-left mt-0.5">
+                ({user.id})
+              </span>
+              <span className="hidden md:inline text-[14px] text-gray-400 ml-1 text-left">
+                ({user.id})
+              </span>
+            </div>
           </div>
         ))}
       </div>

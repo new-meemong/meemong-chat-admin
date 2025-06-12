@@ -110,20 +110,37 @@ const ModelMatchingLatestChatListMobile: React.FC = () => {
                       )}
                     </AvatarFallback>
                   </Avatar>
-                  <span
-                    className={`text-[13px] font-medium text-left break-words ${
-                      user.role === 1
-                        ? "text-blue-500"
-                        : user.role === 2
-                        ? "text-purple-500"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {user.DisplayName}
-                  </span>
-                  <span className="text-[12px] text-gray-500 max-w-[100px] truncate text-left">
-                    ({user.id})
-                  </span>
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-[13px] font-medium text-left break-words ${
+                        user.role === 1
+                          ? "text-blue-500"
+                          : user.role === 2
+                          ? "text-purple-500"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {user.DisplayName}
+                    </span>
+                    <div className="flex flex-row items-center gap-1">
+                      <span className="text-[12px] text-gray-500 max-w-[100px] truncate text-left">
+                        {user.createdAt
+                          ? (() => {
+                              const d = new Date(user.createdAt);
+                              return `${String(d.getFullYear()).slice(
+                                2
+                              )}.${String(d.getMonth() + 1).padStart(
+                                2,
+                                "0"
+                              )}.${String(d.getDate()).padStart(2, "0")}`;
+                            })()
+                          : "생성일 없음"}
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        ({user.id})
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
