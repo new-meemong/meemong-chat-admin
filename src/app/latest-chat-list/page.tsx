@@ -1,9 +1,9 @@
-import ModelMatchingLatestChatList from "@/components/model-matching-latest-chat-channels";
+import ModelMatchingLatestChatListWrapper from "@/components/chat-list/model-matching-latest-chat-list-wrapper";
 
 export default function LatestChatList() {
   return (
     <div>
-      <ModelMatchingLatestChatList />
+      <ModelMatchingLatestChatListWrapper />
     </div>
   );
 }

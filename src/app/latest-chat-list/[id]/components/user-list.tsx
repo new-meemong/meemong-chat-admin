@@ -22,7 +22,7 @@ export default function UserList({ users }: UserListProps) {
         {users.map((user) => (
           <div key={user.id} className="flex items-center space-x-2">
             <Avatar
-              className="border-2 border-white shadow-sm size-20 cursor-pointer"
+              className="border-2 border-white shadow-sm size-12 md:size-20 cursor-pointer"
               onClick={() => {
                 if (user.profileUrl) {
                   const win = window.open("", "_blank");
@@ -58,7 +58,7 @@ export default function UserList({ users }: UserListProps) {
             </Avatar>
 
             <span
-              className={`text-[16px] break-words ${
+              className={`text-[14px] md:text-[16px] break-words ${
                 user.role === 1
                   ? "text-blue-500"
                   : user.role === 2
@@ -68,7 +68,7 @@ export default function UserList({ users }: UserListProps) {
             >
               {user.DisplayName || "이름 없음"}
             </span>
-            <span className="text-[16px] text-gray-500 max-w-[80px] truncate text-center">
+            <span className="text-[14px] md:text-[16px] text-gray-500 max-w-[80px] truncate text-center">
               ({user.id})
             </span>
           </div>

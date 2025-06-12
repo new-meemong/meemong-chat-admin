@@ -73,17 +73,12 @@ const ModelMatchingLatestChatList: React.FC = () => {
       {data.map((channel) => {
         const users = channel.users.slice(0, 2); // 최대 2명
         const lastMsg = channel.lastMessage;
-
-        // 채널을 연 유저 찾기
         const openUser: User | undefined = channel.users.find(
           (u: User) => u.id === channel.channelOpenUserId
         );
-
         let openLabel = null;
         if (openUser?.role === 1) openLabel = "모델이 대화시작";
         else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
-
-        // 시간 포맷: 오전/오후 12:34
         let timeStr = "";
         if (lastMsg?.createdAt) {
           const date = lastMsg.createdAt.toDate
@@ -91,19 +86,18 @@ const ModelMatchingLatestChatList: React.FC = () => {
             : lastMsg.createdAt;
           timeStr = moment(date).locale("ko").format("A h:mm");
         }
-
         return (
           <div
             key={channel.id}
-            className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+            className="flex flex-wrap items-center md:px-3 md:py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
             onClick={() => handleChannelClick(channel, channel.users)}
           >
             {/* 왼쪽: 유저 프로필 */}
-            <div className="flex flex-col items-center min-w-[60px] mr-4">
+            <div className="flex flex-col items-center md:min-w-[60px] md:mr-4">
               <div className="flex -space-x-2">
                 {users.map((user) => (
                   <div key={user.id} className="flex flex-col items-center">
-                    <Avatar className="border-2 border-white shadow-sm size-20">
+                    <Avatar className="border-2 border-white shadow-sm md:size-20">
                       {user.profileUrl ? (
                         <AvatarImage
                           src={user.profileUrl}
@@ -120,7 +114,7 @@ const ModelMatchingLatestChatList: React.FC = () => {
                       </AvatarFallback>
                     </Avatar>
                     <span
-                      className={`text-[14px] text-center mt-1 break-words ${
+                      className={`md:text-[14px] text-center mt-1 break-words ${
                         user.role === 1
                           ? "text-blue-500"
                           : user.role === 2
@@ -130,7 +124,7 @@ const ModelMatchingLatestChatList: React.FC = () => {
                     >
                       {user.DisplayName}
                     </span>
-                    <span className="text-[14px] text-gray-500 max-w-[80px] truncate text-center">
+                    <span className="md:text-[14px] text-gray-500 md:max-w-[80px] truncate text-center">
                       ({user.id})
                     </span>
                   </div>

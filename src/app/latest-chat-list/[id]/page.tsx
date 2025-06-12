@@ -9,8 +9,10 @@ export default function LatestChatDetailPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">채팅 상세 페이지</h1>
-      <p className="mb-4">채팅방 ID: {channel?.id}</p>
+      <h1 className="hidden md:block text-2xl font-bold mb-4">
+        채팅 상세 페이지
+      </h1>
+      <p className="hidden md:block mb-4">채팅방 ID: {channel?.id}</p>
       <UserList users={users} />
       <MessageList channelId={channel?.id || ""} users={users} />
     </div>

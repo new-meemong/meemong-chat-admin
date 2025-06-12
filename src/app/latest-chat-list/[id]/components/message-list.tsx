@@ -1,8 +1,11 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import React, { useState } from "react";
 
 import { User } from "@/types/user";
+import { User as UserIcon } from "lucide-react";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
+import { useRouter } from "next/navigation";
 
 interface MessageListProps {
   channelId: string;
@@ -17,6 +20,7 @@ export default function MessageList({ channelId, users }: MessageListProps) {
     error
   } = useChatMessages(channelId, users);
   const { openUser } = useCurrentChannelStore();
+  const router = useRouter();
 
   // 이미지 모달 상태 추가
   const [modalImage, setModalImage] = useState<string | null>(null);
@@ -27,6 +31,16 @@ export default function MessageList({ channelId, users }: MessageListProps) {
 
   return (
     <>
+      <div className="sm:hidden flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2 px-1 border-b">
+        <button
+          onClick={() => router.back()}
+          className="text-2xl text-gray-700 hover:text-black px-2"
+          aria-label="뒤로가기"
+        >
+          ←
+        </button>
+        <span className="text-base font-semibold">채팅방</span>
+      </div>
       <ul className="flex flex-col space-y-2 mt-4 ">
         {messages.map((msg) => {
           const isSystem = msg.messageType === "system";
@@ -40,7 +54,7 @@ export default function MessageList({ channelId, users }: MessageListProps) {
 
           // 말풍선 스타일 결정
           const bubbleClass = [
-            "max-w-xs px-4 py-2 rounded-lg",
+            "max-w-xs px-3 py-2 rounded-lg",
             isSystem
               ? "bg-gray-200 text-gray-600 text-center"
               : isOpenUser
@@ -51,18 +65,21 @@ export default function MessageList({ channelId, users }: MessageListProps) {
           return (
             <li key={msg.id} className={`flex w-full ${alignClass} items-end`}>
               {/* 상대방 아바타 */}
-              {!isSystem && !isOpenUser && msg.user?.profileUrl && (
-                <img
-                  src={msg.user.profileUrl}
-                  alt="avatar"
-                  className="w-8 h-8 rounded-full mr-2 self-end"
-                />
+              {!isSystem && !isOpenUser && (
+                <Avatar className="w-8 h-8 mr-2 self-end">
+                  {msg.user?.profileUrl ? (
+                    <AvatarImage src={msg.user.profileUrl} alt="avatar" />
+                  ) : null}
+                  <AvatarFallback>
+                    <UserIcon className="w-5 h-5 text-gray-400" />
+                  </AvatarFallback>
+                </Avatar>
               )}
 
               {/* 메시지 말풍선 */}
               <div className={bubbleClass}>
                 {!isSystem && (
-                  <div className="text-xs text-gray-500 mb-1">
+                  <div className="text-[11px] sm:text-xs text-gray-500 mb-1">
                     {msg.user?.DisplayName ?? msg.senderId} ({msg.user?.role})
                   </div>
                 )}
@@ -75,20 +92,23 @@ export default function MessageList({ channelId, users }: MessageListProps) {
                     onClick={() => setModalImage(msg.message)}
                   />
                 ) : (
-                  <div>{msg.message}</div>
+                  <div className="text-sm sm:text-base">{msg.message}</div>
                 )}
-                <div className="text-xs text-gray-400 mt-1 text-right">
+                <div className="text-[10px] sm:text-xs text-gray-400 mt-1 text-right">
                   {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
                 </div>
               </div>
 
               {/* 내 아바타 */}
-              {!isSystem && isOpenUser && openUser?.profileUrl && (
-                <img
-                  src={openUser.profileUrl}
-                  alt="avatar"
-                  className="w-8 h-8 rounded-full ml-2 self-end"
-                />
+              {!isSystem && isOpenUser && (
+                <Avatar className="w-8 h-8 ml-2 self-end">
+                  {openUser?.profileUrl ? (
+                    <AvatarImage src={openUser.profileUrl} alt="avatar" />
+                  ) : null}
+                  <AvatarFallback>
+                    <UserIcon className="w-5 h-5 text-gray-400" />
+                  </AvatarFallback>
+                </Avatar>
               )}
             </li>
           );
