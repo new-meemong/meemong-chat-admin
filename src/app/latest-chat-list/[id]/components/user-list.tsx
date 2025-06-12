@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState } from "react";
 
 import { User } from "@/types/user";
 
@@ -9,6 +10,8 @@ interface UserListProps {
 }
 
 export default function UserList({ users }: UserListProps) {
+  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [modalName, setModalName] = useState<string | null>(null);
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">참여자 목록:</h2>
@@ -25,24 +28,33 @@ export default function UserList({ users }: UserListProps) {
               className="border-2 border-white shadow-sm size-12 md:size-20 cursor-pointer"
               onClick={() => {
                 if (user.profileUrl) {
-                  const win = window.open("", "_blank");
-                  if (win) {
-                    win.document.write(`
-                      <html>
-                        <head>
-                          <title>${user.DisplayName || "프로필 이미지"}</title>
-                          <style>
-                            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000; }
-                            img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-                          </style>
-                        </head>
-                        <body>
-                          <img src="${user.profileUrl}" alt="${
-                      user.DisplayName || "프로필 이미지"
-                    }" />
-                        </body>
-                      </html>
-                    `);
+                  if (window.innerWidth < 768) {
+                    // 모바일: 모달로 띄움
+                    setModalImage(user.profileUrl);
+                    setModalName(user.DisplayName || "프로필 이미지");
+                  } else {
+                    // PC: 새 탭으로 띄움
+                    const win = window.open("", "_blank");
+                    if (win) {
+                      win.document.write(`
+                        <html>
+                          <head>
+                            <title>${
+                              user.DisplayName || "프로필 이미지"
+                            }</title>
+                            <style>
+                              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000; }
+                              img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                            </style>
+                          </head>
+                          <body>
+                            <img src="${user.profileUrl}" alt="${
+                        user.DisplayName || "프로필 이미지"
+                      }" />
+                          </body>
+                        </html>
+                      `);
+                    }
                   }
                 }
               }}
@@ -74,6 +86,29 @@ export default function UserList({ users }: UserListProps) {
           </div>
         ))}
       </div>
+      {modalImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setModalImage(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white text-3xl font-bold z-60 hover:text-gray-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalImage(null);
+            }}
+            aria-label="닫기"
+          >
+            ×
+          </button>
+          <img
+            src={modalImage}
+            alt={modalName || "프로필 이미지"}
+            className="max-w-full max-h-[90vh] rounded shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

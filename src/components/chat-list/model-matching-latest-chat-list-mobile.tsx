@@ -5,6 +5,7 @@ import "moment/locale/ko";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
+import Image from "next/image";
 import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
 import React from "react";
 import { User } from "@/types/user";
@@ -151,8 +152,18 @@ const ModelMatchingLatestChatListMobile: React.FC = () => {
                 </div>
               )}
               <div className="text-sm text-gray-900 font-medium break-all whitespace-normal w-full">
-                {lastMsg?.message || (
-                  <span className="text-gray-400">메시지가 없습니다</span>
+                {lastMsg?.messageType === "image" && lastMsg.message ? (
+                  <Image
+                    src={lastMsg.message}
+                    alt="사진"
+                    width={60}
+                    height={60}
+                    style={{ objectFit: "cover", borderRadius: 8 }}
+                  />
+                ) : (
+                  lastMsg?.message || (
+                    <span className="text-gray-400">메시지가 없습니다</span>
+                  )
                 )}
               </div>
               <div className="text-xs text-gray-400 mt-1">{timeStr}</div>

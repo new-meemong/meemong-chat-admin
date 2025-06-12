@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
         permanent: false
       }
     ];
+  },
+  images: {
+    domains: ["meemong-job-storage.s3.ap-northeast-2.amazonaws.com"]
   }
 };
 
