@@ -24,14 +24,43 @@ export async function fetchUserLatestChatChannels(
     // userId로 currentUser 정보 패치
     const currentUser = await getUser(Number(userId));
 
-    return snapshot.docs.map((doc) => {
-      const data = doc.data() as UserModelMatchingChatChannel;
-      return {
-        ...data,
-        channelId: doc.id, // doc.id가 channelId와 일치한다고 가정
-        currentUser
-      };
-    });
+    return await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const data = doc.data() as UserModelMatchingChatChannel;
+        const channelId = doc.id;
+
+        // messages 서브컬렉션 전체 메시지 개수 구하기
+        const messagesColRef = collection(
+          db,
+          "modelMatchingChatChannels",
+          channelId,
+          "messages"
+        );
+        const allMsgsSnap = await getDocs(messagesColRef);
+        const messageCount = allMsgsSnap.size;
+
+        // 첫 번째 메시지(senderId) 구하기 (createdAt 오름차순)
+        let openUserId: number | null = null;
+        if (!allMsgsSnap.empty) {
+          // createdAt 오름차순 정렬
+          const sortedDocs = allMsgsSnap.docs.sort((a, b) => {
+            const aTime = a.data().createdAt?.toMillis?.() ?? 0;
+            const bTime = b.data().createdAt?.toMillis?.() ?? 0;
+            return aTime - bTime;
+          });
+          const firstMsg = sortedDocs[0];
+          openUserId = Number(firstMsg.data().senderId);
+        }
+
+        return {
+          ...data,
+          channelId,
+          currentUser,
+          messageCount,
+          openUserId
+        };
+      })
+    );
   } catch (error) {
     console.error("fetchUserLatestChatChannelsByUserModel 에러:", error);
     throw error;

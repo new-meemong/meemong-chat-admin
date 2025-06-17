@@ -16,6 +16,8 @@ export interface UserModelMatchingChatChannel {
   updatedAt: Timestamp;
   userId: string;
   currentUser: User;
+  messageCount: number;
+  openUserId: number | null;
 }
 
 export interface LastMessage {

@@ -86,7 +86,15 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-center">
-            <span className="text-lg font-semibold text-gray-900">
+            <span
+              className={`text-lg font-semibold ${
+                currentUser.role === 1
+                  ? "text-blue-500"
+                  : currentUser.role === 2
+                  ? "text-purple-500"
+                  : "text-gray-900"
+              }`}
+            >
               {currentUser.DisplayName}
             </span>
             <span className="text-sm text-gray-500">
@@ -104,6 +112,30 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
         정보: otherUser)
       </div>
       {data.map((channel) => {
+        // openUserId로 openUser 찾기
+        let openUser = null;
+        if (channel.openUserId) {
+          if (
+            channel.currentUser &&
+            channel.currentUser.id === channel.openUserId
+          ) {
+            openUser = {
+              ...channel.currentUser,
+              role: channel.currentUser.role
+            };
+          } else if (
+            channel.otherUser &&
+            channel.otherUser.id === channel.openUserId
+          ) {
+            let newRole = 1;
+            if (channel.currentUser.role === 1) newRole = 2;
+            else if (channel.currentUser.role === 2) newRole = 1;
+            openUser = { ...channel.otherUser, role: newRole };
+          }
+        }
+        let openLabel = null;
+        if (openUser?.role === 1) openLabel = "모델이 대화시작";
+        else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
         const otherUser = channel.otherUser;
         const lastMsg = channel.lastMessage;
         let timeStr = "";
@@ -140,9 +172,9 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
               <div className="flex flex-col">
                 <span
                   className={`text-[13px] font-medium text-left break-words ${
-                    otherUser.Role === 1
+                    otherUser.role === 1
                       ? "text-blue-500"
-                      : otherUser.Role === 2
+                      : otherUser.role === 2
                       ? "text-purple-500"
                       : "text-gray-700"
                   }`}
@@ -159,6 +191,29 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
                 </div>
               </div>
             </div>
+            {/* 라벨 및 메시지수 */}
+            {openLabel && (
+              <div className="flex items-center gap-2 mb-1">
+                <div
+                  className={`text-xs font-semibold text-white rounded px-2 py-0.5 w-fit ${
+                    openUser?.role === 1
+                      ? "bg-blue-400"
+                      : openUser?.role === 2
+                      ? "bg-purple-500"
+                      : "bg-gray-400"
+                  }`}
+                >
+                  {openLabel}
+                </div>
+                <div className="text-xs text-gray-600">
+                  주고받은 메시지수{" "}
+                  <span className="font-bold text-black">
+                    {channel.messageCount}
+                  </span>
+                  개
+                </div>
+              </div>
+            )}
             {/* 아래: 메시지/시간/기타 정보 */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <div className="text-sm text-gray-900 font-medium break-all whitespace-normal w-full">
