@@ -84,7 +84,6 @@ export default function SystemMessageButton({ channelId }: Props) {
     (typeof MESSAGE_OPTIONS)[0] | null
   >(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  console.log("moonsae channelId", channelId);
 
   // 시스템 메시지 전송 mutation
   const sendSystemMessage = useSendSystemMessage();

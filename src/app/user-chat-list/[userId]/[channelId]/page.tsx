@@ -12,11 +12,7 @@ export default function UserLatestChatDetailPage() {
 
   console.log(userId, channelId);
 
-  const { channel, currentUser, otherUser } = useUserCurrentChannelStore();
-
-  console.log("moonsae channel", channel);
-  console.log("moonsae currentUser", currentUser);
-  console.log("moonsae otherUser", otherUser);
+  const { currentUser, otherUser } = useUserCurrentChannelStore();
 
   if (!currentUser || !otherUser) {
     return <div>유저가 없습니다.</div>;

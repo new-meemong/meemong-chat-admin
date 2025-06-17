@@ -144,7 +144,6 @@ const UserLatestChatChannels: React.FC<Props> = ({ userId }) => {
           }
         }
 
-        console.log("moonsae openUser", openUser);
         let openLabel = null;
         if (openUser?.role === 1) openLabel = "모델이 대화시작";
         else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
