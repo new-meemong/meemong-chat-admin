@@ -7,8 +7,10 @@ import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
 import Image from "next/image";
 import React from "react";
-// import { UserModelMatchingChatChannel } from "@/types/user-model-matching-chat-channels";
+import { UserModelMatchingChatChannel } from "@/types/user-model-matching-chat-channels";
 import moment from "moment";
+import { useRouter } from "next/navigation";
+import { useUserCurrentChannelStore } from "@/stores/use-user-current-channel-store";
 import { useUserLatestChatChannels } from "@/hooks/use-user-latest-chat-channels";
 
 interface Props {
@@ -17,6 +19,13 @@ interface Props {
 
 const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
   const { data, isLoading, isError, error } = useUserLatestChatChannels(userId);
+  const setChannelInfo = useUserCurrentChannelStore(
+    (state) => state.setChannelInfo
+  );
+  const clearChannelInfo = useUserCurrentChannelStore(
+    (state) => state.clearChannelInfo
+  );
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -44,8 +53,52 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
     );
   }
 
+  // currentUser 추출
+  const currentUser = data[0]?.currentUser;
+
+  const handleChannelClick = (channel: UserModelMatchingChatChannel) => {
+    clearChannelInfo();
+    // currentUser는 User 타입, otherUser는 OtherUser 타입이므로 User로 변환
+    const currentUser = channel.currentUser;
+    const otherUser = channel.otherUser;
+    otherUser.role = otherUser.Role;
+    otherUser.sex = otherUser.Sex;
+
+    setChannelInfo(channel, currentUser, otherUser);
+    router.push(`/user-chat-list/${channel.userId}/${channel.channelId}`);
+  };
+
   return (
     <div className="space-y-2">
+      {/* currentUser 정보 상단 노출 */}
+      {currentUser && (
+        <div className="flex flex-row items-center justify-center gap-4 py-4 border-b border-gray-200 mb-2">
+          <Avatar className="border-2 border-white shadow-sm size-14">
+            {currentUser.profileUrl ? (
+              <AvatarImage
+                src={currentUser.profileUrl}
+                alt={currentUser.DisplayName}
+                className="object-cover"
+              />
+            ) : null}
+            <AvatarFallback>
+              {currentUser.DisplayName?.[0] || "null"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-center">
+            <span className="text-lg font-semibold text-gray-900">
+              {currentUser.DisplayName}
+            </span>
+            <span className="text-sm text-gray-500">
+              가입일:{" "}
+              {currentUser.createdAt
+                ? moment(currentUser.createdAt).format("YYYY.MM.DD")
+                : "-"}
+            </span>
+            <span className="text-xs text-gray-400">({currentUser.id})</span>
+          </div>
+        </div>
+      )}
       <div className="text-sm text-gray-500">
         새로고침을 하지 않으면 10분간 데이터는 추가패치하지 않습니다. (상대방
         정보: otherUser)
@@ -64,7 +117,7 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
           <div
             key={channel.channelId}
             className="w-full flex flex-col px-2 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-            // onClick={() => ...} // 필요시 상세 페이지 이동 구현
+            onClick={() => handleChannelClick(channel)}
           >
             {/* 상단: 유저 프로필 (가로 배치) */}
             <div className="flex flex-row items-center gap-4 mb-2">
@@ -101,7 +154,7 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
                     {otherUser.profileUrl ? otherUser.Email : "이메일 없음"}
                   </span>
                   <span className="text-[11px] text-gray-400">
-                    ({otherUser.UserID})
+                    ({otherUser.id})
                   </span>
                 </div>
               </div>
@@ -123,13 +176,16 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
                   )
                 )}
               </div>
-              <div className="text-xs text-gray-400 mt-1">{timeStr}</div>
-              <div className="text-xs text-gray-600 mt-1">
-                안 읽은 메시지:{" "}
-                <span className="font-bold text-black">
-                  {channel.unreadCount}
+              {/* 안 읽은 메시지/시간 가로 배치 */}
+              <div className="text-xs text-gray-600 mt-1 flex flex-row items-center gap-2">
+                <span>
+                  안 읽은 메시지:{" "}
+                  <span className="font-bold text-black">
+                    {channel.unreadCount}
+                  </span>
+                  개
                 </span>
-                개
+                <span className="text-gray-400">· {timeStr}</span>
               </div>
             </div>
           </div>

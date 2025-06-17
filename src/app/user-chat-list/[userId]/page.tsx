@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 
 export default function UserChatListPage() {
   const params = useParams();
-  const userId = params.id as string;
+  const userId = params.userId as string;
 
   return <UserLatestChatListWrapper userId={userId} />;
 }

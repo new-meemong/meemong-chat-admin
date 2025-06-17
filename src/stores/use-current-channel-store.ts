@@ -4,6 +4,9 @@ import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
 import { User } from "@/types/user";
 import { create } from "zustand";
 
+/**
+ * 최신 채팅방 리스트에서 들어간 현재 채팅방
+ */
 interface CurrentChannelState {
   channel: ModelMatchingChatChannel | null;
   users: User[];

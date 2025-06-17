@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase/firestore";
+import { User } from "./user";
 
 export interface UserModelMatchingChatChannel {
   channelId: string;
@@ -14,6 +15,7 @@ export interface UserModelMatchingChatChannel {
   unreadCount: number;
   updatedAt: Timestamp;
   userId: string;
+  currentUser: User;
 }
 
 export interface LastMessage {
@@ -33,7 +35,9 @@ export interface OtherUser {
   Korean: string;
   ProfilePictureURL: string;
   Role: number;
+  role?: number;
   Sex: string;
+  sex?: string;
   UserID: string;
   id: number;
   profileUrl: string;

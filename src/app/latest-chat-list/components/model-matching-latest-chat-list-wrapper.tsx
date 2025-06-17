@@ -16,9 +16,6 @@ function useIsMobile() {
   // 768px 미만이면 모바일로 간주
   const [isMobile, setIsMobile] = React.useState(false);
   React.useEffect(() => {
-    console.log("moonsae window", window);
-    console.log("window.innerWidth", window.outerWidth);
-    console.log("window.innerWidth", window.innerWidth);
     const check = () => setIsMobile(window.outerWidth < 768);
     check();
     window.addEventListener("resize", check);

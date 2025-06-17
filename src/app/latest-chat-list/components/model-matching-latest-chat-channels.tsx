@@ -35,6 +35,7 @@ const ModelMatchingLatestChatList: React.FC = () => {
     const openUser: User | undefined = channel.users.find(
       (u: User) => u.id === channel.channelOpenUserId
     );
+
     setChannelInfo(channel, users, openUser ?? null);
     router.push(`/latest-chat-list/${channel.id}`);
   };
