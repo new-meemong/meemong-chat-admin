@@ -1,4 +1,4 @@
-import ModelMatchingLatestChatListWrapper from "@/components/chat-list/model-matching-latest-chat-list-wrapper";
+import ModelMatchingLatestChatListWrapper from "@/app/latest-chat-list/components/model-matching-latest-chat-list-wrapper";
 
 export default function LatestChatList() {
   return (

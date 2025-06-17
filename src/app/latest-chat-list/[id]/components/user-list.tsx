@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import React, { useState } from "react";
 
 import { User } from "@/types/user";
+import { useRouter } from "next/navigation";
 
 interface UserListProps {
   users: User[];
@@ -12,6 +13,7 @@ interface UserListProps {
 export default function UserList({ users }: UserListProps) {
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [modalName, setModalName] = useState<string | null>(null);
+  const router = useRouter();
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">참여자 목록:</h2>
@@ -68,7 +70,10 @@ export default function UserList({ users }: UserListProps) {
               ) : null}
               <AvatarFallback></AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
+            <div
+              className="flex flex-col cursor-pointer"
+              onClick={() => router.push(`/user-chat-list/${user.id}`)}
+            >
               <span
                 className={`text-[14px] md:text-[16px] break-words ${
                   user.role === 1
