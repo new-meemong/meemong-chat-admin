@@ -12,6 +12,7 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useUserCurrentChannelStore } from "@/stores/use-user-current-channel-store";
 import { useUserLatestChatChannels } from "@/hooks/use-user-latest-chat-channels";
+import { useUserTotalChannelCount } from "@/hooks/use-user-toal-channel-count-query";
 
 interface Props {
   userId: string;
@@ -26,6 +27,7 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
     (state) => state.clearChannelInfo
   );
   const router = useRouter();
+  const { data: totalChannelCount } = useUserTotalChannelCount(userId);
 
   if (isLoading) {
     return (
@@ -98,12 +100,21 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
               {currentUser.DisplayName}
             </span>
             <span className="text-sm text-gray-500">
-              가입일:{" "}
+              {" "}
               {currentUser.createdAt
                 ? moment(currentUser.createdAt).format("YYYY.MM.DD")
                 : "-"}
             </span>
             <span className="text-xs text-gray-400">({currentUser.id})</span>
+          </div>
+          {/* 전체 채팅수 라벨 및 값 */}
+          <div className="flex flex-col items-center ml-6">
+            <span className="text-xs font-semibold text-gray-600 bg-gray-100 rounded px-2 py-0.5 mb-1">
+              전체 채팅수
+            </span>
+            <span className="text-lg font-bold text-gray-900">
+              {typeof totalChannelCount === "number" ? totalChannelCount : "-"}
+            </span>
           </div>
         </div>
       )}
