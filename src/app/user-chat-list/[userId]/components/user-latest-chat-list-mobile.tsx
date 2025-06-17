@@ -108,7 +108,7 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
             <span className="text-xs text-gray-400">({currentUser.id})</span>
           </div>
           {/* 전체 채팅수 라벨 및 값 */}
-          <div className="flex flex-col items-center ml-6">
+          <div className="flex flex-col items-center ml-2">
             <span className="text-xs font-semibold text-gray-600 bg-gray-100 rounded px-2 py-0.5 mb-1">
               전체 채팅수
             </span>
@@ -118,10 +118,6 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
           </div>
         </div>
       )}
-      <div className="text-sm text-gray-500">
-        새로고침을 하지 않으면 10분간 데이터는 추가패치하지 않습니다. (상대방
-        정보: otherUser)
-      </div>
       {data.map((channel) => {
         // openUserId로 openUser 찾기
         let openUser = null;

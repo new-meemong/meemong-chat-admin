@@ -64,10 +64,6 @@ const ModelMatchingLatestChatListMobile: React.FC = () => {
 
   return (
     <div className="space-y-2">
-      <div className="text-sm text-gray-500">
-        새로고침을 하지 않으면 10분간 데이터는 추가패치하지 않습니다. 보라색은
-        디자이너, 파란색은 모델입니다.
-      </div>
       {data.map((channel) => {
         const users = channel.users.slice(0, 2); // 최대 2명
         const lastMsg = channel.lastMessage;

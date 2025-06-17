@@ -34,6 +34,13 @@ export default function DailyCountChart() {
     return date.toISOString().slice(0, 10);
   }
 
+  // 요일 반환 함수
+  function getKoreanDayOfWeek(dateString: string) {
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const date = new Date(dateString);
+    return days[date.getDay()];
+  }
+
   // 기본값: 시작일(2025-05-07), 종료일(어제)
   const minStartDate = "2025-05-07";
   const [startDate, setStartDate] = useState<string>(minStartDate);
@@ -178,7 +185,20 @@ export default function DailyCountChart() {
                     />
                     <ChartTooltip
                       cursor={false}
-                      content={<ChartTooltipContent indicator="line" />}
+                      content={
+                        <ChartTooltipContent
+                          indicator="line"
+                          labelFormatter={(label, payload) => {
+                            const date = payload?.[0]?.payload?.date || label;
+                            const day = getKoreanDayOfWeek(date);
+                            return (
+                              <span>
+                                {date} ({day})
+                              </span>
+                            );
+                          }}
+                        />
+                      }
                     />
                     <Area
                       dataKey="dailyTotalCount"
@@ -224,7 +244,20 @@ export default function DailyCountChart() {
                     />
                     <ChartTooltip
                       cursor={false}
-                      content={<ChartTooltipContent indicator="line" />}
+                      content={
+                        <ChartTooltipContent
+                          indicator="line"
+                          labelFormatter={(label, payload) => {
+                            const date = payload?.[0]?.payload?.date || label;
+                            const day = getKoreanDayOfWeek(date);
+                            return (
+                              <span>
+                                {date} ({day})
+                              </span>
+                            );
+                          }}
+                        />
+                      }
                     />
                     <Bar
                       dataKey="dailyTotalCount"
