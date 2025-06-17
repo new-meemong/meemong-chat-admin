@@ -79,11 +79,7 @@ export default function MessageList({ channelId, users }: MessageListProps) {
 
               {/* 메시지 말풍선 */}
               <div className={bubbleClass}>
-                {!isSystem && (
-                  <div className="text-[11px] sm:text-xs text-gray-500 mb-1">
-                    {msg.user?.DisplayName ?? msg.senderId} ({msg.user?.role})
-                  </div>
-                )}
+                {!isSystem && null}
                 {msg.messageType === "image" ? (
                   <img
                     src={msg.message}
@@ -95,7 +91,11 @@ export default function MessageList({ channelId, users }: MessageListProps) {
                 ) : (
                   <div className="text-sm sm:text-base">{msg.message}</div>
                 )}
-                <div className="text-[10px] sm:text-xs text-gray-400 mt-1 text-right">
+                <div
+                  className={`text-[12px] sm:text-xs mt-1 text-right ${
+                    isOpenUser ? "text-gray-200" : "text-gray-500"
+                  }`}
+                >
                   {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
                 </div>
               </div>

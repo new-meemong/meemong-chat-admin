@@ -60,21 +60,7 @@ export default function MessageList({
             }
             return undefined;
           }
-          function getOtherUserDisplayName(user: Partial<User>): string {
-            if (typeof user.DisplayName === "string") return user.DisplayName;
-            if (typeof (user as { UserID?: string }).UserID === "string")
-              return (user as { UserID: string }).UserID;
-            return "";
-          }
-          function getOtherUserRole(user: Partial<User>): number | undefined {
-            if (typeof user.role === "number") return user.role;
-            if (typeof (user as { Role?: number }).Role === "number")
-              return (user as { Role: number }).Role;
-            return undefined;
-          }
           const otherUserId = getOtherUserId(otherUser);
-          const otherUserDisplayName = getOtherUserDisplayName(otherUser);
-          const otherUserRole = getOtherUserRole(otherUser);
           const isOtherUser = msg.senderId === otherUserId;
           // 정렬 클래스 결정
           const alignClass = isSystem
@@ -113,14 +99,7 @@ export default function MessageList({
 
               {/* 메시지 말풍선 */}
               <div className={bubbleClass}>
-                {!isSystem && (
-                  <div className="text-[11px] sm:text-xs text-gray-500 mb-1">
-                    {isCurrentUser
-                      ? currentUser.DisplayName
-                      : otherUserDisplayName || msg.senderId}{" "}
-                    ({isCurrentUser ? currentUser.role : otherUserRole})
-                  </div>
-                )}
+                {!isSystem && null}
                 {msg.messageType === "image" ? (
                   <img
                     src={msg.message}
@@ -132,7 +111,11 @@ export default function MessageList({
                 ) : (
                   <div className="text-sm sm:text-base">{msg.message}</div>
                 )}
-                <div className="text-[10px] sm:text-xs text-gray-400 mt-1 text-right">
+                <div
+                  className={`text-[12px] sm:text-xs mt-1 text-right ${
+                    isCurrentUser ? "text-gray-200" : "text-gray-500"
+                  }`}
+                >
                   {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
                 </div>
               </div>
