@@ -24,9 +24,7 @@ export default function UserLatestChatDetailPage() {
 
   return (
     <div className="p-4">
-      <h1 className="hidden md:block text-2xl font-bold mb-4">
-        채팅 상세 페이지
-      </h1>
+      {/* <SystemMessageButton channelId={channelId} /> */}
       <UserList currentUser={currentUser} otherUser={otherUser} />
       <MessageList
         channelId={channelId}

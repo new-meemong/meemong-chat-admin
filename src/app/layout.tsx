@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import type { Metadata } from "next";
 import Providers from "./providers";
 import SideNavigation from "@/components/side-navigation";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
             <SideNavigation />
             <main className="flex-1 p-2 md:p-8 md:ml-64">{children}</main>
           </div>
+          <Toaster position="top-center" />
         </Providers>
       </body>
     </html>

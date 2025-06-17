@@ -48,7 +48,8 @@ export default function MessageList({
       </div>
       <ul className="flex flex-col space-y-2 mt-4 ">
         {messages.map((msg) => {
-          const isSystem = msg.messageType === "system";
+          const isSystem =
+            msg.messageType === "system" || String(msg.senderId) === "0";
           const isCurrentUser = msg.senderId === currentUser.id;
           // otherUser id, DisplayName, role 안전 분기 (any 사용하지 않음)
           function getOtherUserId(user: Partial<User>): number | undefined {

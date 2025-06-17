@@ -43,7 +43,8 @@ export default function MessageList({ channelId, users }: MessageListProps) {
       </div>
       <ul className="flex flex-col space-y-2 mt-4 ">
         {messages.map((msg) => {
-          const isSystem = msg.messageType === "system";
+          const isSystem =
+            msg.messageType === "system" || String(msg.senderId) === "0";
           const isOpenUser = openUser?.id === msg.senderId;
           // 정렬 클래스 결정
           const alignClass = isSystem
