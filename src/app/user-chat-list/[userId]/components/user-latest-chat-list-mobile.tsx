@@ -118,141 +118,157 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
           </div>
         </div>
       )}
-      {data.map((channel) => {
-        // openUserId로 openUser 찾기
-        let openUser = null;
-        if (channel.openUserId) {
-          if (
-            channel.currentUser &&
-            channel.currentUser.id === channel.openUserId
-          ) {
-            openUser = {
-              ...channel.currentUser,
-              role: channel.currentUser.role
-            };
-          } else if (
-            channel.otherUser &&
-            channel.otherUser.id === channel.openUserId
-          ) {
-            let newRole = 1;
-            if (channel.currentUser.role === 1) newRole = 2;
-            else if (channel.currentUser.role === 2) newRole = 1;
-            openUser = { ...channel.otherUser, role: newRole };
+      {[...data]
+        .sort((a, b) => {
+          const getTime = (
+            msg: UserModelMatchingChatChannel["lastMessage"] | undefined
+          ) => {
+            if (!msg?.createdAt) return 0;
+            if (msg.createdAt.toDate) return msg.createdAt.toDate().getTime();
+            if (msg.createdAt instanceof Date) return msg.createdAt.getTime();
+            return 0;
+          };
+          return getTime(b.lastMessage) - getTime(a.lastMessage);
+        })
+        .map((channel) => {
+          // openUserId로 openUser 찾기
+          let openUser = null;
+          if (channel.openUserId) {
+            if (
+              channel.currentUser &&
+              channel.currentUser.id === channel.openUserId
+            ) {
+              openUser = {
+                ...channel.currentUser,
+                role: channel.currentUser.role
+              };
+            } else if (
+              channel.otherUser &&
+              channel.otherUser.id === channel.openUserId
+            ) {
+              let newRole = 1;
+              if (channel.currentUser.role === 1) newRole = 2;
+              else if (channel.currentUser.role === 2) newRole = 1;
+              openUser = { ...channel.otherUser, role: newRole };
+            }
           }
-        }
-        let openLabel = null;
-        if (openUser?.role === 1) openLabel = "모델이 대화시작";
-        else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
-        const otherUser = channel.otherUser;
-        const lastMsg = channel.lastMessage;
-        let timeStr = "";
-        if (lastMsg?.createdAt) {
-          const date = lastMsg.createdAt.toDate
-            ? lastMsg.createdAt.toDate()
-            : lastMsg.createdAt;
-          timeStr = moment(date).locale("ko").format("A h:mm");
-        }
-        return (
-          <div
-            key={channel.channelId}
-            className="w-full flex flex-col px-2 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => handleChannelClick(channel)}
-          >
-            {/* 상단: 유저 프로필 (가로 배치) */}
-            <div className="flex flex-row items-center gap-4 mb-2">
-              <Avatar className="border-2 border-white shadow-sm size-10">
-                {otherUser.profileUrl ? (
-                  <AvatarImage
-                    src={otherUser.profileUrl}
-                    alt={otherUser.DisplayName}
-                    className="object-cover"
-                  />
-                ) : null}
-                <AvatarFallback>
+          let openLabel = null;
+          if (openUser?.role === 1) openLabel = "모델이 대화시작";
+          else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
+          const otherUser = channel.otherUser;
+          const lastMsg = channel.lastMessage;
+          let timeStr = "";
+          let dateStr = "";
+          if (lastMsg?.createdAt) {
+            const date = lastMsg.createdAt.toDate
+              ? lastMsg.createdAt.toDate()
+              : lastMsg.createdAt;
+            timeStr = moment(date).locale("ko").format("A h:mm");
+            dateStr = moment(date).locale("ko").format("YYYY.MM.DD");
+          }
+          return (
+            <div
+              key={channel.channelId}
+              className="w-full flex flex-col px-2 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+              onClick={() => handleChannelClick(channel)}
+            >
+              {/* 상단: 유저 프로필 (가로 배치) */}
+              <div className="flex flex-row items-center gap-4 mb-2">
+                <Avatar className="border-2 border-white shadow-sm size-10">
                   {otherUser.profileUrl ? (
-                    otherUser.DisplayName?.[0] || "null"
+                    <AvatarImage
+                      src={otherUser.profileUrl}
+                      alt={otherUser.DisplayName}
+                      className="object-cover"
+                    />
+                  ) : null}
+                  <AvatarFallback>
+                    {otherUser.profileUrl ? (
+                      otherUser.DisplayName?.[0] || "null"
+                    ) : (
+                      <UserIcon className="w-5 h-5 text-gray-400" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span
+                    className={`text-[13px] font-medium text-left break-words ${
+                      otherUser.role === 1
+                        ? "text-blue-500"
+                        : otherUser.role === 2
+                        ? "text-purple-500"
+                        : "text-gray-700"
+                    }`}
+                  >
+                    {otherUser.DisplayName}
+                  </span>
+                  <div className="flex flex-row items-center gap-1">
+                    <span className="text-[12px] text-gray-500 max-w-[100px] truncate text-left">
+                      {otherUser.profileUrl ? otherUser.Email : "이메일 없음"}
+                    </span>
+                    <span className="text-[11px] text-gray-400">
+                      ({otherUser.id})
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {/* 라벨 및 메시지수 */}
+              {openLabel && (
+                <div className="flex items-center gap-2 mb-1">
+                  <div
+                    className={`text-xs font-semibold text-white rounded px-2 py-0.5 w-fit ${
+                      openUser?.role === 1
+                        ? "bg-blue-400"
+                        : openUser?.role === 2
+                        ? "bg-purple-500"
+                        : "bg-gray-400"
+                    }`}
+                  >
+                    {openLabel}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    주고받은 메시지수{" "}
+                    <span className="font-bold text-black">
+                      {channel.messageCount}
+                    </span>
+                    개
+                  </div>
+                </div>
+              )}
+              {/* 아래: 메시지/시간/기타 정보 */}
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="text-sm text-gray-900 font-medium break-all whitespace-normal w-full">
+                  {lastMsg?.messageType === "image" && lastMsg.message ? (
+                    <Image
+                      src={lastMsg.message}
+                      alt="사진"
+                      width={60}
+                      height={60}
+                      style={{ objectFit: "cover", borderRadius: 8 }}
+                    />
                   ) : (
-                    <UserIcon className="w-5 h-5 text-gray-400" />
+                    lastMsg?.message || (
+                      <span className="text-gray-400">메시지가 없습니다</span>
+                    )
                   )}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span
-                  className={`text-[13px] font-medium text-left break-words ${
-                    otherUser.role === 1
-                      ? "text-blue-500"
-                      : otherUser.role === 2
-                      ? "text-purple-500"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {otherUser.DisplayName}
-                </span>
-                <div className="flex flex-row items-center gap-1">
-                  <span className="text-[12px] text-gray-500 max-w-[100px] truncate text-left">
-                    {otherUser.profileUrl ? otherUser.Email : "이메일 없음"}
+                </div>
+                {/* 안 읽은 메시지/시간 가로 배치 */}
+                <div className="text-xs text-gray-600 mt-1 flex flex-row items-center gap-2">
+                  <span>
+                    안 읽은 메시지:{" "}
+                    <span className="font-bold text-black">
+                      {channel.unreadCount}
+                    </span>
+                    개
                   </span>
-                  <span className="text-[11px] text-gray-400">
-                    ({otherUser.id})
+                  <span className="text-gray-600">
+                    · {dateStr} · {timeStr}
                   </span>
                 </div>
               </div>
             </div>
-            {/* 라벨 및 메시지수 */}
-            {openLabel && (
-              <div className="flex items-center gap-2 mb-1">
-                <div
-                  className={`text-xs font-semibold text-white rounded px-2 py-0.5 w-fit ${
-                    openUser?.role === 1
-                      ? "bg-blue-400"
-                      : openUser?.role === 2
-                      ? "bg-purple-500"
-                      : "bg-gray-400"
-                  }`}
-                >
-                  {openLabel}
-                </div>
-                <div className="text-xs text-gray-600">
-                  주고받은 메시지수{" "}
-                  <span className="font-bold text-black">
-                    {channel.messageCount}
-                  </span>
-                  개
-                </div>
-              </div>
-            )}
-            {/* 아래: 메시지/시간/기타 정보 */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <div className="text-sm text-gray-900 font-medium break-all whitespace-normal w-full">
-                {lastMsg?.messageType === "image" && lastMsg.message ? (
-                  <Image
-                    src={lastMsg.message}
-                    alt="사진"
-                    width={60}
-                    height={60}
-                    style={{ objectFit: "cover", borderRadius: 8 }}
-                  />
-                ) : (
-                  lastMsg?.message || (
-                    <span className="text-gray-400">메시지가 없습니다</span>
-                  )
-                )}
-              </div>
-              {/* 안 읽은 메시지/시간 가로 배치 */}
-              <div className="text-xs text-gray-600 mt-1 flex flex-row items-center gap-2">
-                <span>
-                  안 읽은 메시지:{" "}
-                  <span className="font-bold text-black">
-                    {channel.unreadCount}
-                  </span>
-                  개
-                </span>
-                <span className="text-gray-400">· {timeStr}</span>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
     </div>
   );
 };
