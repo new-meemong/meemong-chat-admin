@@ -97,7 +97,7 @@ export default function UserList({ users }: UserListProps) {
                         "0"
                       )}`;
                     })()
-                  : "생성일 없음"}
+                  : ""}
               </span>
               {/* 아이디 */}
               <span className="block md:hidden text-[13px] text-gray-400 max-w-[80px] truncate text-left mt-0.5">

@@ -134,7 +134,7 @@ const ModelMatchingLatestChatListMobile: React.FC = () => {
                                 "0"
                               )}.${String(d.getDate()).padStart(2, "0")}`;
                             })()
-                          : "생성일 없음"}
+                          : ""}
                       </span>
                       <span className="text-[11px] text-gray-400">
                         ({user.id})
