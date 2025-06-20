@@ -1,4 +1,8 @@
 import {
+  ChatMessageType,
+  sendPushNotification
+} from "@/apis/push-notification";
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -16,7 +20,6 @@ import {
 import { Button } from "../ui/button";
 import { CardDescription } from "../ui/card";
 import { User } from "@/types/user";
-import { sendPushNotification } from "@/apis/push-notification";
 import { toast } from "sonner";
 import { useSendSystemMessage } from "@/hooks/use-send-system-message-query";
 import { useState } from "react";
@@ -25,13 +28,13 @@ import { useState } from "react";
 const MESSAGE_OPTIONS = [
   {
     label: "과도한 영업",
-    type: "warningNormal",
+    type: "system",
     value:
       "단순 영업 활동 및 과도한 재료비 요구 시 서비스 이용에 제한이 발생할 수 있습니다."
   },
   {
     label: "타 플랫폼 유도",
-    type: "warningNnormal",
+    type: "system",
     value:
       "타 플랫폼(인스타, 카카오톡, 구글폼 등) 이용 요구 시 서비스 이용에 제한이 발생할 수 있습니다."
   },
@@ -132,13 +135,21 @@ export default function SystemMessageButton({
 
       if (currentUser?.id) {
         promises.push(
-          sendPushNotification(String(currentUser.id), selectedMessage.value)
+          sendPushNotification(
+            String(currentUser.id),
+            selectedMessage.value,
+            ChatMessageType.SYSTEM
+          )
         );
       }
 
       if (otherUser?.id) {
         promises.push(
-          sendPushNotification(String(otherUser.id), selectedMessage.value)
+          sendPushNotification(
+            String(otherUser.id),
+            selectedMessage.value,
+            ChatMessageType.SYSTEM
+          )
         );
       }
 

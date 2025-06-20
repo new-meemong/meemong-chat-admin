@@ -1,6 +1,7 @@
 "use client";
 
 import MessageList from "./components/message-list";
+import SystemMessageButton from "@/components/admin/system-message-button";
 // import SystemMessageButton from "@/components/admin/system-message-button";
 import UserList from "./components/user-list";
 import { useParams } from "next/navigation";
@@ -21,11 +22,11 @@ export default function UserLatestChatDetailPage() {
 
   return (
     <div className="p-4">
-      {/* <SystemMessageButton
+      <SystemMessageButton
         channelId={channelId}
         currentUser={currentUser}
         otherUser={otherUser}
-      /> */}
+      />
       <UserList currentUser={currentUser} otherUser={otherUser} />
       <MessageList
         channelId={channelId}
