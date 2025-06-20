@@ -43,30 +43,46 @@ export default function MessageList({ channelId, users }: MessageListProps) {
       </div>
       <ul className="flex flex-col space-y-2 mt-4 ">
         {messages.map((msg) => {
-          const isSystem =
-            msg.messageType === "system" || String(msg.senderId) === "0";
+          const isSystemSender = String(msg.senderId) === "0";
+          const isSystemType = msg.messageType === "system";
+          const isWarningNormal = msg.messageType === "warningNormal";
+          const isWarningStrong = msg.messageType === "warningStrong";
+
+          const isSystemMessage =
+            isSystemSender ||
+            isSystemType ||
+            isWarningNormal ||
+            isWarningStrong;
+
           const isOpenUser = openUser?.id === msg.senderId;
           // 정렬 클래스 결정
-          const alignClass = isSystem
+          const alignClass = isSystemMessage
             ? "justify-center"
             : isOpenUser
             ? "justify-end"
             : "justify-start";
 
           // 말풍선 스타일 결정
+          let bubbleStyle = "";
+          if (isWarningStrong) {
+            bubbleStyle = "bg-red-100 text-red-700 text-center";
+          } else if (isSystemSender || isSystemType || isWarningNormal) {
+            bubbleStyle = "bg-gray-200 text-gray-600 text-center";
+          } else if (isOpenUser) {
+            bubbleStyle = "bg-blue-500 text-white rounded-br-none ml-auto";
+          } else {
+            bubbleStyle = "bg-gray-100 text-gray-800 rounded-bl-none mr-auto";
+          }
+
           const bubbleClass = [
             "max-w-xs px-3 py-2 rounded-lg",
-            isSystem
-              ? "bg-gray-200 text-gray-600 text-center"
-              : isOpenUser
-              ? "bg-blue-500 text-white rounded-br-none ml-auto"
-              : "bg-gray-100 text-gray-800 rounded-bl-none mr-auto"
+            bubbleStyle
           ].join(" ");
 
           return (
             <li key={msg.id} className={`flex w-full ${alignClass} items-end`}>
               {/* 상대방 아바타 */}
-              {!isSystem && !isOpenUser && (
+              {!isSystemMessage && !isOpenUser && (
                 <Avatar className="w-8 h-8 mr-2 self-end">
                   {msg.user?.profileUrl ? (
                     <AvatarImage src={msg.user.profileUrl} alt="avatar" />
@@ -79,7 +95,7 @@ export default function MessageList({ channelId, users }: MessageListProps) {
 
               {/* 메시지 말풍선 */}
               <div className={bubbleClass}>
-                {!isSystem && null}
+                {!isSystemMessage && null}
                 {msg.messageType === "image" ? (
                   <img
                     src={msg.message}
@@ -101,7 +117,7 @@ export default function MessageList({ channelId, users }: MessageListProps) {
               </div>
 
               {/* 내 아바타 */}
-              {!isSystem && isOpenUser && (
+              {!isSystemMessage && isOpenUser && (
                 <Avatar className="w-8 h-8 ml-2 self-end">
                   {openUser?.profileUrl ? (
                     <AvatarImage src={openUser.profileUrl} alt="avatar" />

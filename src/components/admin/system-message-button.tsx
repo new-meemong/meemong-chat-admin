@@ -15,6 +15,8 @@ import {
 
 import { Button } from "../ui/button";
 import { CardDescription } from "../ui/card";
+import { User } from "@/types/user";
+import { sendPushNotification } from "@/apis/push-notification";
 import { toast } from "sonner";
 import { useSendSystemMessage } from "@/hooks/use-send-system-message-query";
 import { useState } from "react";
@@ -23,54 +25,68 @@ import { useState } from "react";
 const MESSAGE_OPTIONS = [
   {
     label: "과도한 영업",
+    type: "warningNormal",
     value:
       "단순 영업 활동 및 과도한 재료비 요구 시 서비스 이용에 제한이 발생할 수 있습니다."
   },
   {
     label: "타 플랫폼 유도",
+    type: "warningNnormal",
     value:
       "타 플랫폼(인스타, 카카오톡, 구글폼 등) 이용 요구 시 서비스 이용에 제한이 발생할 수 있습니다."
   },
   {
     label: "부적절한 언행",
+    type: "system",
     value:
       "부적절한 언행이 감지될 경우 서비스 이용에 제한이 발생할 수 있습니다."
   },
   {
     label: "일방적인 약속 변경/취소",
+    type: "system",
     value:
       "일방적인 약속 변경이나 취소가 반복될 경우 서비스 이용에 제한이 발생할 수 있습니다."
   },
   {
     label: "개인정보 요구",
+    type: "system",
     value: "부적절한 개인정보 요구 시 서비스 이용에 제한이 발생할 수 있습니다."
   },
   {
     label: "강제종료 고지",
-    value: "부적절한 사용이 반복될 시 채팅방이 강제 종료될 수 있습니다(1차)."
+    type: "system",
+    value: "부적절한 사용이 반복될 시 채팅방이 강제 종료될 수 있습니다.(1차)"
   },
   {
     label: "강제종료 재고지",
-    value: "부적절한 사용이 반복될 시 채팅방이 강제 종료될 수 있습니다(2차)."
+    type: "system",
+    value: "부적절한 사용이 반복될 시 채팅방이 강제 종료될 수 있습니다.(2차)"
   }
 ];
 
 interface Props {
   channelId: string;
+  currentUser: User;
+  otherUser: Partial<User>;
 }
 
 // description 안내문구를 재사용할 수 있도록 컴포넌트로 분리
 function MessageDescription({
   description,
-  minHeight = 100
+  minHeight = 100,
+  type
 }: {
   description?: string;
   minHeight?: number;
+  type?: string;
 }) {
+  const isWarningStrong = type === "warningStrong";
   return (
     <div className={`min-h-[${minHeight}px] flex items-center justify-center`}>
       {description ? (
-        <CardDescription>{description}</CardDescription>
+        <CardDescription className={isWarningStrong ? "text-red-500" : ""}>
+          {description}
+        </CardDescription>
       ) : (
         <CardDescription className="invisible">placeholder</CardDescription>
       )}
@@ -78,7 +94,11 @@ function MessageDescription({
   );
 }
 
-export default function SystemMessageButton({ channelId }: Props) {
+export default function SystemMessageButton({
+  channelId,
+  currentUser,
+  otherUser
+}: Props) {
   const [open, setOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<
     (typeof MESSAGE_OPTIONS)[0] | null
@@ -102,17 +122,39 @@ export default function SystemMessageButton({ channelId }: Props) {
     try {
       await sendSystemMessage.mutateAsync({
         channelId,
-        message: selectedMessage.value
+        message: selectedMessage.value,
+        type: selectedMessage.type,
+        user1Id: String(currentUser.id),
+        user2Id: String(otherUser.id)
       });
+
+      const promises = [];
+
+      if (currentUser?.id) {
+        promises.push(
+          sendPushNotification(String(currentUser.id), selectedMessage.value)
+        );
+      }
+
+      if (otherUser?.id) {
+        promises.push(
+          sendPushNotification(String(otherUser.id), selectedMessage.value)
+        );
+      }
+
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
+
       setConfirmOpen(false);
       setOpen(false);
       setSelectedMessage(null);
-      toast.success("시스템 메시지가 전송되었습니다.");
+      toast.success("시스템 메시지가 전송되었고 푸시알림이 발송되었습니다.");
       setTimeout(() => {
         window.location.reload();
       }, 100);
     } catch {
-      toast.error("메시지 전송에 실패했습니다.");
+      toast.error("메시지 또는 푸시알림 전송에 실패했습니다.");
     }
   };
 
@@ -155,6 +197,7 @@ export default function SystemMessageButton({ channelId }: Props) {
             <MessageDescription
               description={selectedMessage?.value}
               minHeight={100}
+              type={selectedMessage?.type}
             />
           </div>
           <DialogFooter>
@@ -180,6 +223,7 @@ export default function SystemMessageButton({ channelId }: Props) {
           <MessageDescription
             description={selectedMessage?.value}
             minHeight={32}
+            type={selectedMessage?.type}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>

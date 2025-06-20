@@ -6,10 +6,16 @@ export function useSendSystemMessage() {
   return useMutation({
     mutationFn: ({
       channelId,
-      message
+      message,
+      type,
+      user1Id,
+      user2Id
     }: {
       channelId: string;
       message: string;
-    }) => postSystemMessageToChannel(channelId, message)
+      type: string;
+      user1Id: string;
+      user2Id: string;
+    }) => postSystemMessageToChannel(channelId, message, type, user1Id, user2Id)
   });
 }
