@@ -48,20 +48,15 @@ export async function postSystemMessageToChannel(
     updatedAt: serverTimestamp()
   });
 
-  if (!user1Id || !user2Id) {
+  if (!user1Id) {
     console.error("User IDs are required to update chat metadata.");
     return;
   }
 
-  // 두 유저의 메타데이터 업데이트
+  // user1의 메타데이터 업데이트
   const user1MetaRef = doc(
     db,
     `users/${user1Id}/userModelMatchingChatChannels`,
-    channelId
-  );
-  const user2MetaRef = doc(
-    db,
-    `users/${user2Id}/userModelMatchingChatChannels`,
     channelId
   );
 
@@ -71,11 +66,24 @@ export async function postSystemMessageToChannel(
     unreadCount: increment(1)
   });
 
-  const updateUser2Meta = updateDoc(user2MetaRef, {
-    lastMessage: newMessageData,
-    updatedAt: serverTimestamp(),
-    unreadCount: increment(1)
-  });
+  const updatePromises = [updateUser1Meta];
 
-  await Promise.all([updateUser1Meta, updateUser2Meta]);
+  // user2Id가 있는 경우에만 user2의 메타데이터 업데이트
+  if (user2Id && user2Id.trim() !== "") {
+    const user2MetaRef = doc(
+      db,
+      `users/${user2Id}/userModelMatchingChatChannels`,
+      channelId
+    );
+
+    const updateUser2Meta = updateDoc(user2MetaRef, {
+      lastMessage: newMessageData,
+      updatedAt: serverTimestamp(),
+      unreadCount: increment(1)
+    });
+
+    updatePromises.push(updateUser2Meta);
+  }
+
+  await Promise.all(updatePromises);
 }

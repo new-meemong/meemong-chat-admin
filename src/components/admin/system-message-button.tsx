@@ -77,7 +77,7 @@ const MESSAGE_OPTIONS = [
 interface Props {
   channelId: string;
   currentUser: User;
-  otherUser: Partial<User>;
+  otherUser: Partial<User> | null;
 }
 
 // description 안내문구를 재사용할 수 있도록 컴포넌트로 분리
@@ -135,7 +135,7 @@ export default function SystemMessageButton({
         message: selectedMessage.value,
         type: selectedMessage.type,
         user1Id: String(currentUser.id),
-        user2Id: String(otherUser.id)
+        user2Id: otherUser ? String(otherUser.id) : ""
       });
 
       const promises = [];
