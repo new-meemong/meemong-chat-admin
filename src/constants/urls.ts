@@ -1,4 +1,4 @@
-export const PRODUCTION_API = "https://job-api.meemong.com";
+export const PRODUCTION_API = "https://api.meemong.com";
 export const WEBVIEW_API_KEY =
   "$2b$10$93M3ylHjy9eC0dTahDLxR.ZGDRyRvJEiq44XiFppovFht.nBRe4p.";
 
