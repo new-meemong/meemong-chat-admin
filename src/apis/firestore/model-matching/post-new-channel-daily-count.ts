@@ -2,6 +2,7 @@ import {
   Timestamp,
   collection,
   doc,
+  getCountFromServer,
   getDoc,
   getDocs,
   limit,
@@ -37,20 +38,22 @@ export async function countDailyNewChatChannelsByDate(
     where("createdAt", "<=", endTimestamp)
   );
 
-  const snapshot = await getDocs(q);
+  // 문서 내용 없이 개수만 가져오기 (성능 최적화)
+  const snapshot = await getCountFromServer(q);
+  const count = snapshot.data().count;
 
   // dailyCreatedChannels 문서 생성/업데이트
   const dailyDocRef = doc(db, "modelMatchingDailyCount", dateString);
   const dailyDocSnap = await getDoc(dailyDocRef);
   if (!dailyDocSnap.exists()) {
     await setDoc(dailyDocRef, {
-      dailyTotalCount: snapshot.size,
+      dailyTotalCount: count,
       createdAt: Timestamp.now(),
       baseDate: dateString
     });
   }
 
-  return snapshot.size;
+  return count;
 }
 
 /**
