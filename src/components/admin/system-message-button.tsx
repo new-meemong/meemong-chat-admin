@@ -64,7 +64,8 @@ const MESSAGE_OPTIONS = [
     label: "강제종료 고지",
     type: "system",
     // type: "warningStrong",
-    value: "부적절한 사용이 반복될 시 채팅방이 강제 종료될 수 있습니다.(1차)"
+    value:
+      "부적절한 사용이 반복될 시 모든 채팅방이 강제 종료되며 채팅서비스도 불가합니다.(1차)"
   },
   {
     label: "강제종료 재고지",
