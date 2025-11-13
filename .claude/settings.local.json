@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:code.claude.com)"
+      "WebFetch(domain:code.claude.com)",
+      "Bash(while read dir)",
+      "Bash(then echo \"EMPTY: $dir\" fi done)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
