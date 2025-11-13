@@ -1,4 +1,4 @@
-import { getDailyCountsByPeriod } from "@/apis/firestore/model-matching/get-daily-counts";
+import { getDailyCountsByPeriod } from "@/apis/firestore/get-daily-counts";
 import { useQuery } from "@tanstack/react-query";
 
 interface DailyCountItem {

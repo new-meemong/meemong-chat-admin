@@ -1,5 +1,5 @@
 import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
-import { fetchLatestChatChannels } from "@/apis/firestore/model-matching/fetch-latest-chat-channels";
+import { fetchLatestChatChannels } from "@/apis/firestore/fetch-latest-chat-channels";
 import { useQuery } from "@tanstack/react-query";
 
 interface UseLatestChatChannelsResult {

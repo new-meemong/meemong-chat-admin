@@ -1,6 +1,6 @@
 import { ModelMatchingChatMessage } from "@/types/model-matching-chat-message";
 import { User } from "@/types/user";
-import { fetchChatMessages } from "@/apis/firestore/model-matching/fetch-chat-messages";
+import { fetchChatMessages } from "@/apis/firestore/fetch-chat-messages";
 // src/hooks/chatMessages/useChatMessages.ts
 import { useQuery } from "@tanstack/react-query";
 

@@ -1,4 +1,4 @@
-import { countDailyNewChatChannels } from "@/apis/firestore/model-matching/post-new-channel-daily-count";
+import { countDailyNewChatChannels } from "@/apis/firestore/post-new-channel-daily-count";
 import { useMutation } from "@tanstack/react-query";
 
 /**

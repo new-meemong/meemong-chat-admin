@@ -25,10 +25,10 @@ const SideNavigation = () => {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="/latest-chat-list"
+                    href="/latest-model-matching-chat-list"
                     className="block p-2 rounded hover:bg-gray-200 transition-colors"
                   >
-                    최근 대화 목록(100개)
+                    최근 모델 대화 목록(100개)
                   </Link>
                 </li>
                 <li>
@@ -52,10 +52,10 @@ const SideNavigation = () => {
         <ul className="space-y-2">
           <li>
             <Link
-              href="/latest-chat-list"
+              href="/latest-model-matching-chat-list"
               className="block p-2 rounded hover:bg-gray-200 transition-colors"
             >
-              최근 대화 목록(100개)
+              최근 모델 대화 목록(100개)
             </Link>
           </li>
           <li>

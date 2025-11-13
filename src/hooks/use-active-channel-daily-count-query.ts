@@ -1,4 +1,4 @@
-import { countDailyActiveChatChannelsByDate } from "@/apis/firestore/model-matching/post-active-channel-daily-count";
+import { countDailyActiveChatChannelsByDate } from "@/apis/firestore/post-active-channel-daily-count";
 import { useQuery } from "@tanstack/react-query";
 
 interface UseDailyCountResult {

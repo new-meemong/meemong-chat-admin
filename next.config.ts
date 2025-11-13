@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/",
-        destination: "/latest-chat-list",
+        destination: "/latest-model-matching-chat-list",
         permanent: false
       }
     ];

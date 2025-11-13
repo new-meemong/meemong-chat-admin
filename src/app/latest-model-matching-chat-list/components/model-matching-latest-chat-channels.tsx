@@ -37,7 +37,7 @@ const ModelMatchingLatestChatList: React.FC = () => {
     );
 
     setChannelInfo(channel, users, openUser ?? null);
-    router.push(`/latest-chat-list/${channel.id}`);
+    router.push(`/latest-model-matching-chat-list/${channel.id}`);
   };
 
   if (isLoading) {

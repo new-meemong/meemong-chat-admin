@@ -1,4 +1,4 @@
-import { fetchUserTotalChannelCount } from "@/apis/firestore/model-matching/fetch-user-total-channel-count";
+import { fetchUserTotalChannelCount } from "@/apis/firestore/fetch-user-total-channel-count";
 import { useQuery } from "@tanstack/react-query";
 
 interface UseUserTotalChannelCountResult {
