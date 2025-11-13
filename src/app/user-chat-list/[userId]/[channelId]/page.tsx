@@ -14,7 +14,10 @@ export default function UserLatestChatDetailPage() {
 
   console.log(userId, channelId);
 
-  const { currentUser, otherUser } = useUserCurrentChannelStore();
+  const store = useUserCurrentChannelStore();
+  const channelInfo = store.getChannelInfo("model-matching");
+  const currentUser = channelInfo?.currentUser || null;
+  const otherUser = channelInfo?.otherUser || null;
 
   if (!currentUser || !otherUser) {
     return <div>유저가 없습니다.</div>;
@@ -26,6 +29,7 @@ export default function UserLatestChatDetailPage() {
         channelId={channelId}
         currentUser={currentUser}
         otherUser={otherUser}
+        channelType="model-matching"
       />
       <UserList currentUser={currentUser} otherUser={otherUser} />
       <MessageList

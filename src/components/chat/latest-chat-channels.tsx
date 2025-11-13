@@ -1,5 +1,3 @@
-// 경로: src/components/chat/model-matching-latest-chat-list.tsx
-
 "use client";
 
 import "moment/locale/ko";
@@ -7,8 +5,8 @@ import "moment/locale/ko";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
-import { ChatChannel } from "@/types/chat";
 import Image from "next/image";
+import { ChatChannel, ChatChannelType } from "@/types/chat";
 import React from "react";
 import { User } from "@/types/user";
 import moment from "moment";
@@ -16,9 +14,14 @@ import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
 import { useRouter } from "next/navigation";
 
-const ModelMatchingLatestChatList: React.FC = () => {
+interface LatestChatChannelsProps {
+  channelType: ChatChannelType;
+}
+
+const LatestChatChannels: React.FC<LatestChatChannelsProps> = ({
+  channelType
+}) => {
   const router = useRouter();
-  const channelType = "model-matching" as const;
   const { data, isLoading, error } = useLatestChatChannels(channelType);
   const setChannelInfo = useCurrentChannelStore(
     (state) => state.setChannelInfo
@@ -35,7 +38,7 @@ const ModelMatchingLatestChatList: React.FC = () => {
     );
 
     setChannelInfo(channelType, channel, users, openUser ?? null);
-    router.push(`/latest-model-matching-chat-list/${channel.id}`);
+    router.push(`/latest-${channelType}-chat-list/${channel.id}`);
   };
 
   if (isLoading) {
@@ -191,4 +194,6 @@ const ModelMatchingLatestChatList: React.FC = () => {
   );
 };
 
-export default ModelMatchingLatestChatList;
+export default LatestChatChannels;
+
+

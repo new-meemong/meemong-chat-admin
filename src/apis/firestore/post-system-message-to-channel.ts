@@ -7,24 +7,31 @@ import {
   updateDoc
 } from "firebase/firestore";
 
-import { db } from "@/lib/firebase"; // firebase 초기화된 객체 import 필요
+import { db } from "@/lib/firebase";
+import { ChatChannelType } from "@/types/chat";
+import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 
 /**
  * 특정 채팅방에 시스템 메시지를 보냅니다.
  * @param channelId 채팅방 ID
  * @param message 보낼 메시지 내용
- * @returns 생성된 메시지 문서 ID
+ * @param type 메시지 타입
+ * @param user1Id 사용자 1 ID
+ * @param user2Id 사용자 2 ID
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
 export async function postSystemMessageToChannel(
   channelId: string,
   message: string,
   type: string,
   user1Id: string,
-  user2Id: string
+  user2Id: string,
+  channelType: ChatChannelType = 'model-matching'
 ) {
+  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
   const messagesRef = collection(
     db,
-    "modelMatchingChatChannels",
+    collections.channels,
     channelId,
     "messages"
   );
@@ -43,7 +50,7 @@ export async function postSystemMessageToChannel(
   await setDoc(newMessageRef, newMessageData);
 
   // 채널 업데이트
-  const channelRef = doc(db, "modelMatchingChatChannels", channelId);
+  const channelRef = doc(db, collections.channels, channelId);
   await updateDoc(channelRef, {
     updatedAt: serverTimestamp()
   });
@@ -56,7 +63,7 @@ export async function postSystemMessageToChannel(
   // user1의 메타데이터 업데이트
   const user1MetaRef = doc(
     db,
-    `users/${user1Id}/userModelMatchingChatChannels`,
+    `users/${user1Id}/${collections.userChannels}`,
     channelId
   );
 
@@ -72,7 +79,7 @@ export async function postSystemMessageToChannel(
   if (user2Id && user2Id.trim() !== "") {
     const user2MetaRef = doc(
       db,
-      `users/${user2Id}/userModelMatchingChatChannels`,
+      `users/${user2Id}/${collections.userChannels}`,
       channelId
     );
 

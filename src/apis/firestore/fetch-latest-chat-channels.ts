@@ -1,3 +1,4 @@
+import { ChatChannel, ChatChannelType, ChatMessage } from "@/types/chat";
 import {
   DocumentData,
   Timestamp,
@@ -8,21 +9,21 @@ import {
   query
 } from "firebase/firestore";
 
-import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
-import { ModelMatchingChatMessage } from "@/types/model-matching-chat-message";
+import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/apis/users/get-user";
 
 /**
  * 최신 채팅방(채널) 100개를 가져오고, 각 채널의 마지막 메시지도 함께 조회하는 함수
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
-export async function fetchLatestChatChannels(): Promise<
-  (ModelMatchingChatChannel & {
-    lastMessage: ModelMatchingChatMessage | null;
-  })[]
-> {
+export async function fetchLatestChatChannels(
+  channelType: ChatChannelType = "model-matching"
+): Promise<ChatChannel[]> {
+  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
+
   // 1) 컬렉션 참조 생성
-  const chatChannelsCol = collection(db, "modelMatchingChatChannels");
+  const chatChannelsCol = collection(db, collections.channels);
 
   // 2) 쿼리: updatedAt 내림차순, 최대 100개
   const q = query(chatChannelsCol, orderBy("updatedAt", "desc"), limit(100));
@@ -61,7 +62,7 @@ export async function fetchLatestChatChannels(): Promise<
       // ─── 추가: messages 서브컬렉션에서 마지막 메시지 조회 ───
       const messagesCol = collection(
         db,
-        "modelMatchingChatChannels",
+        collections.channels,
         channelId,
         "messages"
       );
@@ -76,7 +77,7 @@ export async function fetchLatestChatChannels(): Promise<
       const allMsgsSnap = await getDocs(messagesCol);
       const messageCount = allMsgsSnap.size;
 
-      let lastMessage: ModelMatchingChatMessage | null = null;
+      let lastMessage: ChatMessage | null = null;
       if (!msgSnap.empty) {
         const msgData = msgSnap.docs[0].data();
         const senderId = msgData.senderId;
@@ -86,6 +87,7 @@ export async function fetchLatestChatChannels(): Promise<
           id: msgSnap.docs[0].id,
           message: msgData.message,
           messageType: msgData.messageType,
+          metaPathList: msgData.metaPathList || [],
           senderId: senderId,
           createdAt: msgData.createdAt as Timestamp,
           updatedAt: msgData.updatedAt as Timestamp,
@@ -96,12 +98,12 @@ export async function fetchLatestChatChannels(): Promise<
 
       return {
         id: channelId,
+        type: channelType,
         channelKey: data.channelKey,
         participantsIds: filteredParticipantsIds,
         channelOpenUserId: Number(data.channelOpenUserId),
         createdAt: data.createdAt as Timestamp,
         updatedAt: data.updatedAt as Timestamp,
-        // 필요하다면 추가 필드(unreadCount, otherUser 등)를 여기에 포함
         lastMessage,
         users,
         messageCount

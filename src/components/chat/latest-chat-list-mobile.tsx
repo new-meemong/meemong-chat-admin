@@ -1,5 +1,3 @@
-// 경로: src/components/chat/model-matching-latest-chat-list.tsx
-
 "use client";
 
 import "moment/locale/ko";
@@ -7,8 +5,8 @@ import "moment/locale/ko";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
-import { ChatChannel } from "@/types/chat";
 import Image from "next/image";
+import { ChatChannel, ChatChannelType } from "@/types/chat";
 import React from "react";
 import { User } from "@/types/user";
 import moment from "moment";
@@ -16,9 +14,14 @@ import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
 import { useRouter } from "next/navigation";
 
-const ModelMatchingLatestChatList: React.FC = () => {
+interface LatestChatListMobileProps {
+  channelType: ChatChannelType;
+}
+
+const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
+  channelType
+}) => {
   const router = useRouter();
-  const channelType = "model-matching" as const;
   const { data, isLoading, error } = useLatestChatChannels(channelType);
   const setChannelInfo = useCurrentChannelStore(
     (state) => state.setChannelInfo
@@ -29,13 +32,11 @@ const ModelMatchingLatestChatList: React.FC = () => {
 
   const handleChannelClick = (channel: ChatChannel, users: User[]) => {
     clearChannelInfo(channelType);
-    // openUser 계산
     const openUser: User | undefined = channel.users.find(
       (u: User) => u.id === channel.channelOpenUserId
     );
-
     setChannelInfo(channelType, channel, users, openUser ?? null);
-    router.push(`/latest-model-matching-chat-list/${channel.id}`);
+    router.push(`/latest-${channelType}-chat-list/${channel.id}`);
   };
 
   if (isLoading) {
@@ -85,32 +86,32 @@ const ModelMatchingLatestChatList: React.FC = () => {
         return (
           <div
             key={channel.id}
-            className="flex flex-wrap items-center md:px-3 md:py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+            className="w-full flex flex-col px-2 py-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
             onClick={() => handleChannelClick(channel, channel.users)}
           >
-            {/* 왼쪽: 유저 프로필 */}
-            <div className="flex flex-col items-center md:min-w-[60px] md:mr-4">
-              <div className="flex -space-x-2">
-                {users.map((user) => (
-                  <div key={user.id} className="flex flex-col items-center">
-                    <Avatar className="border-2 border-white shadow-sm md:size-20">
+            {/* 상단: 유저 프로필 (가로 배치) */}
+            <div className="flex flex-row items-center gap-4 mb-2">
+              {users.map((user) => (
+                <div key={user.id} className="flex flex-row items-center gap-2">
+                  <Avatar className="border-2 border-white shadow-sm size-10">
+                    {user.profileUrl ? (
+                      <AvatarImage
+                        src={user.profileUrl}
+                        alt={user.DisplayName}
+                        className="object-cover"
+                      />
+                    ) : null}
+                    <AvatarFallback>
                       {user.profileUrl ? (
-                        <AvatarImage
-                          src={user.profileUrl}
-                          alt={user.DisplayName}
-                          className="object-cover"
-                        />
-                      ) : null}
-                      <AvatarFallback>
-                        {user.profileUrl ? (
-                          user.DisplayName?.[0] || "null"
-                        ) : (
-                          <UserIcon className="w-5 h-5 text-gray-400" />
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
+                        user.DisplayName?.[0] || "null"
+                      ) : (
+                        <UserIcon className="w-5 h-5 text-gray-400" />
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
                     <span
-                      className={`md:text-[14px] text-center mt-1 break-words ${
+                      className={`text-[13px] font-medium text-left break-words ${
                         user.role === 1
                           ? "text-blue-500"
                           : user.role === 2
@@ -120,29 +121,30 @@ const ModelMatchingLatestChatList: React.FC = () => {
                     >
                       {user.DisplayName}
                     </span>
-                    <span className="md:text-[14px] text-gray-500 md:max-w-[80px] truncate text-center">
-                      {user.createdAt
-                        ? (() => {
-                            const d = new Date(user.createdAt);
-                            return `${String(d.getFullYear()).slice(
-                              2
-                            )}.${String(d.getMonth() + 1).padStart(
-                              2,
-                              "0"
-                            )}.${String(d.getDate()).padStart(2, "0")}`;
-                          })()
-                        : ""}
-                    </span>
-                    <span className="md:text-[13px] text-gray-400 text-center">
-                      ({user.id})
-                    </span>
+                    <div className="flex flex-row items-center gap-1">
+                      <span className="text-[12px] text-gray-500 max-w-[100px] truncate text-left">
+                        {user.createdAt
+                          ? (() => {
+                              const d = new Date(user.createdAt);
+                              return `${String(d.getFullYear()).slice(
+                                2
+                              )}.${String(d.getMonth() + 1).padStart(
+                                2,
+                                "0"
+                              )}.${String(d.getDate()).padStart(2, "0")}`;
+                            })()
+                          : ""}
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        ({user.id})
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-            {/* 오른쪽: 메시지/시간 */}
+            {/* 아래: 메시지/시간/기타 정보 */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              {/* 라벨 추가 */}
               {openLabel && (
                 <div className="flex items-center gap-2 mb-1">
                   <div
@@ -165,23 +167,21 @@ const ModelMatchingLatestChatList: React.FC = () => {
                   </div>
                 </div>
               )}
-              {lastMsg?.messageType === "image" && lastMsg.message ? (
-                <div className="py-1">
+              <div className="text-sm text-gray-900 font-medium break-all whitespace-normal w-full">
+                {lastMsg?.messageType === "image" && lastMsg.message ? (
                   <Image
                     src={lastMsg.message}
                     alt="사진"
-                    width={80}
-                    height={80}
+                    width={60}
+                    height={60}
                     style={{ objectFit: "cover", borderRadius: 8 }}
                   />
-                </div>
-              ) : (
-                <div className="text-sm text-gray-900 font-medium break-words line-clamp-2 max-h-[2.8em]">
-                  {lastMsg?.message || (
+                ) : (
+                  lastMsg?.message || (
                     <span className="text-gray-400">메시지가 없습니다</span>
-                  )}
-                </div>
-              )}
+                  )
+                )}
+              </div>
               <div className="text-xs text-gray-400 mt-1">{timeStr}</div>
             </div>
           </div>
@@ -191,4 +191,6 @@ const ModelMatchingLatestChatList: React.FC = () => {
   );
 };
 
-export default ModelMatchingLatestChatList;
+export default LatestChatListMobile;
+
+

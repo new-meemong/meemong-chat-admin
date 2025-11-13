@@ -1,33 +1,58 @@
+import { ChatChannel, ChatChannelType } from "@/types/chat";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
 import { User } from "@/types/user";
 import { create } from "zustand";
 
 /**
- * 최신 채팅방 리스트에서 들어간 현재 채팅방
+ * 채널 정보 타입
  */
-interface CurrentChannelState {
-  channel: ModelMatchingChatChannel | null;
+interface ChannelInfo {
+  channel: ChatChannel | null;
   users: User[];
   openUser: User | null;
+}
+
+/**
+ * 최신 채팅방 리스트에서 들어간 현재 채팅방
+ * 타입별로 분리된 상태 관리
+ */
+interface CurrentChannelState {
+  channels: {
+    [K in ChatChannelType]: ChannelInfo | null;
+  };
   setChannelInfo: (
-    channel: ModelMatchingChatChannel,
+    type: ChatChannelType,
+    channel: ChatChannel,
     users: User[],
     openUser: User | null
   ) => void;
-  clearChannelInfo: () => void;
+  getChannelInfo: (type: ChatChannelType) => ChannelInfo | null;
+  clearChannelInfo: (type: ChatChannelType) => void;
 }
 
 export const useCurrentChannelStore = create<CurrentChannelState>()(
   persist(
-    (set) => ({
-      channel: null,
-      users: [],
-      openUser: null,
-      setChannelInfo: (channel, users, openUser) =>
-        set({ channel, users, openUser }),
-      clearChannelInfo: () => set({ channel: null, users: [], openUser: null })
+    (set, get) => ({
+      channels: {
+        "model-matching": null,
+        "hair-consultation": null
+      },
+      setChannelInfo: (type, channel, users, openUser) =>
+        set((state) => ({
+          channels: {
+            ...state.channels,
+            [type]: { channel, users, openUser }
+          }
+        })),
+      getChannelInfo: (type) => get().channels[type],
+      clearChannelInfo: (type) =>
+        set((state) => ({
+          channels: {
+            ...state.channels,
+            [type]: null
+          }
+        }))
     }),
     {
       name: "current-channel-store",

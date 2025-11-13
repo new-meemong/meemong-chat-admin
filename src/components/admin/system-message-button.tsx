@@ -19,6 +19,7 @@ import {
 
 import { Button } from "../ui/button";
 import { CardDescription } from "../ui/card";
+import { ChatChannelType } from "@/types/chat";
 import { User } from "@/types/user";
 import { toast } from "sonner";
 import { useSendSystemMessage } from "@/hooks/use-send-system-message-query";
@@ -80,6 +81,7 @@ interface Props {
   channelId: string;
   currentUser: User;
   otherUser: Partial<User> | null;
+  channelType?: ChatChannelType;
 }
 
 // description 안내문구를 재사용할 수 있도록 컴포넌트로 분리
@@ -109,7 +111,8 @@ function MessageDescription({
 export default function SystemMessageButton({
   channelId,
   currentUser,
-  otherUser
+  otherUser,
+  channelType = "model-matching"
 }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<
@@ -137,7 +140,8 @@ export default function SystemMessageButton({
         message: selectedMessage.value,
         type: selectedMessage.type,
         user1Id: String(currentUser.id),
-        user2Id: otherUser ? String(otherUser.id) : ""
+        user2Id: otherUser ? String(otherUser.id) : "",
+        channelType
       });
 
       const promises = [];

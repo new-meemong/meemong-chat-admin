@@ -1,4 +1,5 @@
 import { countDailyNewChatChannelsByDate } from "@/apis/firestore/post-new-channel-daily-count";
+import { ChatChannelType } from "@/types/chat";
 import { useQuery } from "@tanstack/react-query";
 
 interface UseDailyCountResult {
@@ -11,13 +12,15 @@ interface UseDailyCountResult {
 /**
  * 주어진 날짜(YYYY-MM-DD)에 생성된 채팅방 수를 가져오는 TanStack Query 훅
  * @param dateString 예: "2025-06-01"
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
 export function useNewChannelDailyCountQuery(
-  dateString: string
+  dateString: string,
+  channelType: ChatChannelType = 'model-matching'
 ): UseDailyCountResult {
   const query = useQuery<number, Error>({
-    queryKey: ["dailyCount", dateString],
-    queryFn: () => countDailyNewChatChannelsByDate(dateString),
+    queryKey: ["dailyCount", channelType, dateString],
+    queryFn: () => countDailyNewChatChannelsByDate(dateString, channelType),
     enabled: !!dateString,
     // staleTime: Infinity,
     // gcTime: Infinity,

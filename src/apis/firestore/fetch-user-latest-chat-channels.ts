@@ -1,22 +1,27 @@
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
-import { UserModelMatchingChatChannel } from "@/types/user-model-matching-chat-channels";
+import { UserChatChannel, ChatChannelType } from "@/types/chat";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/apis/users/get-user";
+import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 
 /**
- * 특정 userId의 userModelMatchingChatChannel 컬렉션에서
+ * 특정 userId의 userChatChannel 컬렉션에서
  * updatedAt 기준으로 최신 100개 채팅방을 가져오는 함수
+ * @param userId 사용자 ID
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
 export async function fetchUserLatestChatChannels(
-  userId: string
-): Promise<UserModelMatchingChatChannel[]> {
+  userId: string,
+  channelType: ChatChannelType = 'model-matching'
+): Promise<UserChatChannel[]> {
   try {
+    const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
     const userChannelsRef = collection(
       db,
       "users",
       userId,
-      "userModelMatchingChatChannels"
+      collections.userChannels
     );
     const q = query(userChannelsRef, orderBy("updatedAt", "desc"), limit(100));
     const snapshot = await getDocs(q);
@@ -26,13 +31,13 @@ export async function fetchUserLatestChatChannels(
 
     return await Promise.all(
       snapshot.docs.map(async (doc) => {
-        const data = doc.data() as UserModelMatchingChatChannel;
+        const data = doc.data() as Omit<UserChatChannel, 'type'>;
         const channelId = doc.id;
 
         // messages 서브컬렉션 전체 메시지 개수 구하기
         const messagesColRef = collection(
           db,
-          "modelMatchingChatChannels",
+          collections.channels,
           channelId,
           "messages"
         );
@@ -54,6 +59,7 @@ export async function fetchUserLatestChatChannels(
 
         return {
           ...data,
+          type: channelType,
           channelId,
           currentUser,
           messageCount,

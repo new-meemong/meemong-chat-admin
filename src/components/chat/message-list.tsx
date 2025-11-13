@@ -4,38 +4,39 @@ import React, { useState } from "react";
 import { User } from "@/types/user";
 import { User as UserIcon } from "lucide-react";
 import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useRouter } from "next/navigation";
 import { ChatChannelType } from "@/types/chat";
-import { useUserCurrentChannelStore } from "@/stores/use-user-current-channel-store";
 
 interface MessageListProps {
   channelId: string;
-  currentUser: User;
-  otherUser: Partial<User>;
+  users: User[];
+  channelType: ChatChannelType;
 }
 
 export default function MessageList({
   channelId,
-  currentUser,
-  otherUser
+  users,
+  channelType
 }: MessageListProps) {
-  // currentUser, otherUser를 users 배열로 만들어서 useChatMessages에 전달
-  const users = [currentUser, otherUser as User];
-  const channelType: ChatChannelType = "model-matching";
   const {
     data: messages,
     isLoading,
     isError,
     error
   } = useChatMessages(channelId, users, channelType);
+  const store = useCurrentChannelStore();
+  const channelInfo = store.getChannelInfo(channelType);
+  const openUser = channelInfo?.openUser || null;
   const router = useRouter();
 
-  // 이미지 모달 상태
+  // 이미지 모달 상태 추가
   const [modalImage, setModalImage] = useState<string | null>(null);
 
   if (isLoading) return <div>메시지 불러오는 중...</div>;
   if (isError) return <div>에러 발생: {error?.message}</div>;
-  if (!messages || messages.length === 0) return <div>메시지가 없습니다.</div>;
+  if (!messages || messages.length === 0)
+    return <div>메시지가 없습니다.</div>;
 
   return (
     <>
@@ -61,22 +62,12 @@ export default function MessageList({
             isSystemType ||
             isWarningNormal ||
             isWarningStrong;
-          const isCurrentUser = msg.senderId === currentUser.id;
-          // otherUser id, DisplayName, role 안전 분기 (any 사용하지 않음)
-          function getOtherUserId(user: Partial<User>): number | undefined {
-            if (typeof user.id === "number") return user.id;
-            if (typeof (user as { UserID?: string }).UserID === "string") {
-              const parsed = Number((user as { UserID: string }).UserID);
-              return isNaN(parsed) ? undefined : parsed;
-            }
-            return undefined;
-          }
-          const otherUserId = getOtherUserId(otherUser);
-          const isOtherUser = msg.senderId === otherUserId;
+
+          const isOpenUser = openUser?.id === msg.senderId;
           // 정렬 클래스 결정
           const alignClass = isSystemMessage
             ? "justify-center"
-            : isCurrentUser
+            : isOpenUser
             ? "justify-end"
             : "justify-start";
 
@@ -86,7 +77,7 @@ export default function MessageList({
             bubbleStyle = "bg-red-100 text-red-700 text-center";
           } else if (isSystemSender || isSystemType || isWarningNormal) {
             bubbleStyle = "bg-gray-200 text-gray-600 text-center";
-          } else if (isCurrentUser) {
+          } else if (isOpenUser) {
             bubbleStyle = "bg-blue-500 text-white rounded-br-none ml-auto";
           } else {
             bubbleStyle = "bg-gray-100 text-gray-800 rounded-bl-none mr-auto";
@@ -100,14 +91,10 @@ export default function MessageList({
           return (
             <li key={msg.id} className={`flex w-full ${alignClass} items-end`}>
               {/* 상대방 아바타 */}
-              {!isSystemMessage && isOtherUser && (
+              {!isSystemMessage && !isOpenUser && (
                 <Avatar className="w-8 h-8 mr-2 self-end">
-                  {otherUser.profileUrl ? (
-                    <AvatarImage
-                      src={otherUser.profileUrl}
-                      className="object-cover"
-                      alt="avatar"
-                    />
+                  {msg.user?.profileUrl ? (
+                    <AvatarImage src={msg.user.profileUrl} alt="avatar" />
                   ) : null}
                   <AvatarFallback>
                     <UserIcon className="w-5 h-5 text-gray-400" />
@@ -131,7 +118,7 @@ export default function MessageList({
                 )}
                 <div
                   className={`text-[12px] sm:text-xs mt-1 text-right ${
-                    isCurrentUser ? "text-gray-200" : "text-gray-500"
+                    isOpenUser ? "text-gray-200" : "text-gray-500"
                   }`}
                 >
                   {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
@@ -139,14 +126,10 @@ export default function MessageList({
               </div>
 
               {/* 내 아바타 */}
-              {!isSystemMessage && isCurrentUser && (
+              {!isSystemMessage && isOpenUser && (
                 <Avatar className="w-8 h-8 ml-2 self-end">
-                  {currentUser.profileUrl ? (
-                    <AvatarImage
-                      src={currentUser.profileUrl}
-                      className="object-cover"
-                      alt="avatar"
-                    />
+                  {openUser?.profileUrl ? (
+                    <AvatarImage src={openUser.profileUrl} alt="avatar" />
                   ) : null}
                   <AvatarFallback>
                     <UserIcon className="w-5 h-5 text-gray-400" />
@@ -185,3 +168,5 @@ export default function MessageList({
     </>
   );
 }
+
+

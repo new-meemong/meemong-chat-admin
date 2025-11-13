@@ -1,4 +1,5 @@
 import { getDailyCountsByPeriod } from "@/apis/firestore/get-daily-counts";
+import { ChatChannelType } from "@/types/chat";
 import { useQuery } from "@tanstack/react-query";
 
 interface DailyCountItem {
@@ -19,14 +20,16 @@ interface UseDailyCountListQueryResult {
  * 주어진 기간(YYYY-MM-DD ~ YYYY-MM-DD)의 daily count 리스트를 가져오는 TanStack Query 훅
  * @param startDate 예: "2025-06-01"
  * @param endDate 예: "2025-06-10"
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
 export function useDailyCountListQuery(
   startDate: string,
-  endDate: string
+  endDate: string,
+  channelType: ChatChannelType = 'model-matching'
 ): UseDailyCountListQueryResult {
   const query = useQuery<DailyCountItem[], Error>({
-    queryKey: ["dailyCountList", startDate, endDate],
-    queryFn: () => getDailyCountsByPeriod(startDate, endDate),
+    queryKey: ["dailyCountList", channelType, startDate, endDate],
+    queryFn: () => getDailyCountsByPeriod(startDate, endDate, channelType),
     enabled: !!startDate && !!endDate,
     staleTime: 0,
     gcTime: 0,

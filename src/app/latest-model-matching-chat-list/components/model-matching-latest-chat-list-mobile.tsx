@@ -5,8 +5,8 @@ import "moment/locale/ko";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
+import { ChatChannel } from "@/types/chat";
 import Image from "next/image";
-import { ModelMatchingChatChannel } from "@/types/model-matching-chat-channel";
 import React from "react";
 import { User } from "@/types/user";
 import moment from "moment";
@@ -16,7 +16,8 @@ import { useRouter } from "next/navigation";
 
 const ModelMatchingLatestChatListMobile: React.FC = () => {
   const router = useRouter();
-  const { data, isLoading, error } = useLatestChatChannels();
+  const channelType = "model-matching" as const;
+  const { data, isLoading, error } = useLatestChatChannels(channelType);
   const setChannelInfo = useCurrentChannelStore(
     (state) => state.setChannelInfo
   );
@@ -24,15 +25,12 @@ const ModelMatchingLatestChatListMobile: React.FC = () => {
     (state) => state.clearChannelInfo
   );
 
-  const handleChannelClick = (
-    channel: ModelMatchingChatChannel,
-    users: User[]
-  ) => {
-    clearChannelInfo();
+  const handleChannelClick = (channel: ChatChannel, users: User[]) => {
+    clearChannelInfo(channelType);
     const openUser: User | undefined = channel.users.find(
       (u: User) => u.id === channel.channelOpenUserId
     );
-    setChannelInfo(channel, users, openUser ?? null);
+    setChannelInfo(channelType, channel, users, openUser ?? null);
     router.push(`/latest-model-matching-chat-list/${channel.id}`);
   };
 

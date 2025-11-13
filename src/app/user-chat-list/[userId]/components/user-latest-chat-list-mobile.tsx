@@ -7,7 +7,7 @@ import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
 import Image from "next/image";
 import React from "react";
-import { UserModelMatchingChatChannel } from "@/types/user-model-matching-chat-channels";
+import { UserChatChannel, ChatChannelType } from "@/types/chat";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useUserCurrentChannelStore } from "@/stores/use-user-current-channel-store";
@@ -19,7 +19,11 @@ interface Props {
 }
 
 const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
-  const { data, isLoading, isError, error } = useUserLatestChatChannels(userId);
+  const channelType: ChatChannelType = "model-matching";
+  const { data, isLoading, isError, error } = useUserLatestChatChannels(
+    userId,
+    channelType
+  );
   const setChannelInfo = useUserCurrentChannelStore(
     (state) => state.setChannelInfo
   );
@@ -27,7 +31,10 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
     (state) => state.clearChannelInfo
   );
   const router = useRouter();
-  const { data: totalChannelCount } = useUserTotalChannelCount(userId);
+  const { data: totalChannelCount } = useUserTotalChannelCount(
+    userId,
+    channelType
+  );
 
   if (isLoading) {
     return (
@@ -58,15 +65,15 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
   // currentUser 추출
   const currentUser = data[0]?.currentUser;
 
-  const handleChannelClick = (channel: UserModelMatchingChatChannel) => {
-    clearChannelInfo();
+  const handleChannelClick = (channel: UserChatChannel) => {
+    clearChannelInfo(channelType);
     // currentUser는 User 타입, otherUser는 OtherUser 타입이므로 User로 변환
     const currentUser = channel.currentUser;
     const otherUser = channel.otherUser;
     otherUser.role = otherUser.Role;
     otherUser.sex = otherUser.Sex;
 
-    setChannelInfo(channel, currentUser, otherUser);
+    setChannelInfo(channelType, channel, currentUser, otherUser);
     router.push(`/user-chat-list/${channel.userId}/${channel.channelId}`);
   };
 
@@ -120,9 +127,7 @@ const UserLatestChatListMobile: React.FC<Props> = ({ userId }) => {
       )}
       {[...data]
         .sort((a, b) => {
-          const getTime = (
-            msg: UserModelMatchingChatChannel["lastMessage"] | undefined
-          ) => {
+          const getTime = (msg: UserChatChannel["lastMessage"] | undefined) => {
             if (!msg?.createdAt) return 0;
             if (msg.createdAt.toDate) return msg.createdAt.toDate().getTime();
             if (msg.createdAt instanceof Date) return msg.createdAt.getTime();

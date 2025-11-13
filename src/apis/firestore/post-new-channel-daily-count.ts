@@ -14,14 +14,19 @@ import {
 
 import { countDailyActiveChatChannelsByDate } from "./post-active-channel-daily-count";
 import { db } from "@/lib/firebase";
+import { ChatChannelType } from "@/types/chat";
+import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 
 /**
  * 주어진 날짜(YYYY-MM-DD)에 생성된 채팅방의 수를 반환합니다.
  * @param dateString 예: "2025-06-01"
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
 export async function countDailyNewChatChannelsByDate(
-  dateString: string
+  dateString: string,
+  channelType: ChatChannelType = 'model-matching'
 ): Promise<number> {
+  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
   // 입력받은 날짜의 00:00:00 ~ 23:59:59 범위 계산
   const start = new Date(dateString + "T00:00:00.000Z");
   const end = new Date(dateString + "T23:59:59.999Z");
@@ -31,7 +36,7 @@ export async function countDailyNewChatChannelsByDate(
   const endTimestamp = Timestamp.fromDate(end);
 
   // 쿼리 생성: createdAt >= start AND createdAt <= end
-  const chatChannelsCol = collection(db, "modelMatchingChatChannels");
+  const chatChannelsCol = collection(db, collections.channels);
   const q = query(
     chatChannelsCol,
     where("createdAt", ">=", startTimestamp),
@@ -43,7 +48,7 @@ export async function countDailyNewChatChannelsByDate(
   const count = snapshot.data().count;
 
   // dailyCreatedChannels 문서 생성/업데이트
-  const dailyDocRef = doc(db, "modelMatchingDailyCount", dateString);
+  const dailyDocRef = doc(db, collections.dailyCount, dateString);
   const dailyDocSnap = await getDoc(dailyDocRef);
   if (!dailyDocSnap.exists()) {
     await setDoc(dailyDocRef, {
@@ -57,17 +62,22 @@ export async function countDailyNewChatChannelsByDate(
 }
 
 /**
- * modelMatchingDailyCount의 baseDate가 가장 최신인 데이터를 찾고,
+ * dailyCount의 baseDate가 가장 최신인 데이터를 찾고,
  * 그 다음날부터 어제까지의 각 날짜별로 countChatChannelsByDate를 호출해 setDoc을 생성합니다.
+ * @param channelType 채널 타입 (기본값: 'model-matching')
  */
-export async function countDailyNewChatChannels(): Promise<void> {
+export async function countDailyNewChatChannels(
+  channelType: ChatChannelType = 'model-matching'
+): Promise<void> {
+  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
+
   // 1. 최신 baseDate 구하기 (내림차순 정렬, 1개 limit)
-  const dailyCountCol = collection(db, "modelMatchingDailyCount");
+  const dailyCountCol = collection(db, collections.dailyCount);
   const q = query(dailyCountCol, orderBy("baseDate", "desc"), limit(1));
   const snapshot = await getDocs(q);
   if (snapshot.empty) {
     throw new Error(
-      "modelMatchingDailyCount에 데이터가 없습니다. 최소 1개는 필요합니다."
+      `${collections.dailyCount}에 데이터가 없습니다. 최소 1개는 필요합니다.`
     );
   }
   const latestDoc = snapshot.docs[0];
@@ -97,7 +107,7 @@ export async function countDailyNewChatChannels(): Promise<void> {
 
   // 4. 각 날짜별로 countChatChannelsByDate 호출
   for (const dateString of dates) {
-    await countDailyNewChatChannelsByDate(dateString);
-    await countDailyActiveChatChannelsByDate(dateString);
+    await countDailyNewChatChannelsByDate(dateString, channelType);
+    await countDailyActiveChatChannelsByDate(dateString, channelType);
   }
 }

@@ -33,6 +33,14 @@ const SideNavigation = () => {
                 </li>
                 <li>
                   <Link
+                    href="/latest-hair-consultation-chat-list"
+                    className="block p-2 rounded hover:bg-gray-200 transition-colors"
+                  >
+                    최근 헤어 대화 목록(100개)
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/daily-count"
                     className="block p-2 rounded hover:bg-gray-200 transition-colors"
                   >
@@ -56,6 +64,14 @@ const SideNavigation = () => {
               className="block p-2 rounded hover:bg-gray-200 transition-colors"
             >
               최근 모델 대화 목록(100개)
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/latest-hair-consultation-chat-list"
+              className="block p-2 rounded hover:bg-gray-200 transition-colors"
+            >
+              최근 헤어 대화 목록(100개)
             </Link>
           </li>
           <li>
