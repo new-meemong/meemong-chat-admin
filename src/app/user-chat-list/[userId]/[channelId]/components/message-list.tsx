@@ -1,12 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import React, { useState } from "react";
 
+import { ChatChannelType } from "@/types/chat";
 import { User } from "@/types/user";
 import { User as UserIcon } from "lucide-react";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useRouter } from "next/navigation";
-import { ChatChannelType } from "@/types/chat";
-import { useUserCurrentChannelStore } from "@/stores/use-user-current-channel-store";
 
 interface MessageListProps {
   channelId: string;

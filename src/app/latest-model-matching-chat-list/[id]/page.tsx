@@ -10,7 +10,6 @@ export default function LatestChatDetailPage() {
   const channelInfo = store.getChannelInfo("model-matching");
   const channel = channelInfo?.channel || null;
   const users = channelInfo?.users || [];
-  const openUser = channelInfo?.openUser || null;
 
   // users 배열에서 currentUser와 otherUser 추출
   const currentUser = users[0];
