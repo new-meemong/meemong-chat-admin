@@ -17,6 +17,7 @@ import {
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ChatChannelType } from "@/types/chat";
 import { TrendingUp } from "lucide-react";
 import { useCountDailyNewChatChannels } from "@/hooks/use-count-chat-channels-query";
 import { useDailyCountListQuery } from "@/hooks/use-daily-count-list-query";
@@ -129,7 +130,8 @@ export default function DailyCountChart() {
             <Button
               variant="outline"
               onClick={() => {
-                mutation.mutate(undefined, {
+                const channelType: ChatChannelType = "model-matching";
+                mutation.mutate(channelType, {
                   onSuccess: async () => {
                     await queryClient.invalidateQueries({
                       queryKey: ["dailyCountList"]

@@ -2,7 +2,7 @@
 
 import MessageList from "@/components/chat/message-list";
 import SystemMessageButton from "@/components/admin/system-message-button";
-import UserList from "./components/user-list";
+import UserList from "@/components/chat/user-list";
 import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 
 export default function LatestChatDetailPage() {
