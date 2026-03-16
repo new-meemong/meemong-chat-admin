@@ -83,7 +83,7 @@ const LatestChatChannels: React.FC<LatestChatChannelsProps> = ({
           const date = lastMsg.createdAt.toDate
             ? lastMsg.createdAt.toDate()
             : lastMsg.createdAt;
-          timeStr = moment(date).locale("ko").format("A h:mm");
+          timeStr = moment(date).format("YYYY-MM-DD HH:mm");
         }
         return (
           <div
@@ -117,8 +117,8 @@ const LatestChatChannels: React.FC<LatestChatChannelsProps> = ({
                         user.role === 1
                           ? "text-blue-500"
                           : user.role === 2
-                          ? "text-purple-500"
-                          : "text-gray-700"
+                            ? "text-purple-500"
+                            : "text-gray-700"
                       }`}
                     >
                       {user.DisplayName}
@@ -153,8 +153,8 @@ const LatestChatChannels: React.FC<LatestChatChannelsProps> = ({
                       openUser?.role === 1
                         ? "bg-blue-400"
                         : openUser?.role === 2
-                        ? "bg-purple-500"
-                        : "bg-gray-400"
+                          ? "bg-purple-500"
+                          : "bg-gray-400"
                     }`}
                   >
                     {openLabel}
@@ -195,5 +195,3 @@ const LatestChatChannels: React.FC<LatestChatChannelsProps> = ({
 };
 
 export default LatestChatChannels;
-
-

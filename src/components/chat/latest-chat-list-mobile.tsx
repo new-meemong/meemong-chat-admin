@@ -3,10 +3,10 @@
 import "moment/locale/ko";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChatChannel, ChatChannelType } from "@/types/chat";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
 import Image from "next/image";
-import { ChatChannel, ChatChannelType } from "@/types/chat";
 import React from "react";
 import { User } from "@/types/user";
 import moment from "moment";
@@ -81,7 +81,7 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
           const date = lastMsg.createdAt.toDate
             ? lastMsg.createdAt.toDate()
             : lastMsg.createdAt;
-          timeStr = moment(date).locale("ko").format("A h:mm");
+          timeStr = moment(date).format("YYYY-MM-DD HH:mm");
         }
         return (
           <div
@@ -115,8 +115,8 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
                         user.role === 1
                           ? "text-blue-500"
                           : user.role === 2
-                          ? "text-purple-500"
-                          : "text-gray-700"
+                            ? "text-purple-500"
+                            : "text-gray-700"
                       }`}
                     >
                       {user.DisplayName}
@@ -152,8 +152,8 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
                       openUser?.role === 1
                         ? "bg-blue-400"
                         : openUser?.role === 2
-                        ? "bg-purple-500"
-                        : "bg-gray-400"
+                          ? "bg-purple-500"
+                          : "bg-gray-400"
                     }`}
                   >
                     {openLabel}
@@ -192,5 +192,3 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
 };
 
 export default LatestChatListMobile;
-
-
