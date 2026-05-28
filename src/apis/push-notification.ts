@@ -21,6 +21,6 @@ export const sendPushNotification = async (
     });
   } catch (error) {
     console.error("[sendPushNotification] failed", error);
-    return { success: false, error: error || "푸시 알림 전송에 실패했습니다" };
+    throw error;
   }
 };

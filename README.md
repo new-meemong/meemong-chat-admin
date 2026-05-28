@@ -2,6 +2,15 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+The app gets a fresh JWT by calling the webview login API before the first
+authenticated API request.
+
+Local environment values:
+
+```bash
+MEEMONG_API_URL=https://api.meemong.com
+```
+
 First, run the development server:
 
 ```bash
@@ -14,7 +23,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:4000](http://localhost:4000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

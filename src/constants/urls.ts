@@ -1,6 +1,5 @@
-export const PRODUCTION_API = "https://api.meemong.com";
+export const MEEMONG_API_URL =
+  process.env.NEXT_PUBLIC_MEEMONG_API_URL ?? "https://api.meemong.com";
+
 export const WEBVIEW_API_KEY =
   "$2b$10$93M3ylHjy9eC0dTahDLxR.ZGDRyRvJEiq44XiFppovFht.nBRe4p.";
-
-export const jwt =
-  "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2FwaS5tZWVtb25nLmNvbSIsImlhdCI6MTc3MjAwNDQ0NywidHlwZSI6IkNMSUVOVF9BUFBfVVNFUiIsImlzRGV2RGF0YWJhc2UiOmZhbHNlLCJhcHBJZGVudGlmaWVySWQiOm51bGwsInVzZXJJZCI6NTY0NTUsImV4cCI6MTc3OTc4MDQ0N30.SMKFA5uKcyus_jWhNofLFun29QfGw9-0GQYrAMjdLqA";

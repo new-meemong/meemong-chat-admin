@@ -12,6 +12,18 @@ import {
 import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/apis/users/get-user";
+import { isAuthTokenError } from "@/apis/fetch";
+import { User } from "@/types/user";
+
+const getParticipantIds = (participantsIds: unknown): number[] => {
+  if (!Array.isArray(participantsIds)) return [];
+
+  return participantsIds
+    .map((userId) => Number(userId))
+    .filter((userId) => Number.isFinite(userId));
+};
+
+const isUser = (user: User | undefined): user is User => user !== undefined;
 
 /**
  * 최신 채팅방(채널) 100개를 가져오고, 각 채널의 마지막 메시지도 함께 조회하는 함수
@@ -31,33 +43,45 @@ export async function fetchLatestChatChannels(
   // 3) 쿼리 실행 (getDocs)
   const snapshot = await getDocs(q);
 
+  const channelDocs = snapshot.docs.map((doc) => {
+    const data = doc.data() as DocumentData;
+
+    return {
+      data,
+      channelId: doc.id,
+      participantsIds: getParticipantIds(data.participantsIds)
+    };
+  });
+
+  const userIds = Array.from(
+    new Set(channelDocs.flatMap((channel) => channel.participantsIds))
+  );
+  const usersById = new Map<number, User>();
+
+  const loadUser = async (userId: number) => {
+    try {
+      const user = await getUser(userId);
+      usersById.set(userId, user);
+    } catch (error) {
+      if (isAuthTokenError(error)) {
+        throw error;
+      }
+
+      console.warn(
+        `[fetchLatestChatChannels] getUser failed for ${userId}`,
+        error
+      );
+    }
+  };
+
+  await Promise.all(userIds.map(loadUser));
+
   // 4) 문서 스냅샷을 비동기로 순회하며, lastMessage도 함께 조회
   const channelsWithLastMsg = await Promise.all(
-    snapshot.docs.map(async (doc) => {
-      const data = doc.data() as DocumentData;
-      const channelId = doc.id;
-      const participantsIds: number[] = data.participantsIds;
-
-      // participantsIds에서 'system' 제외
-      const filteredParticipantsIds = participantsIds.filter(
-        (userId) => String(userId) !== "system"
-      );
-      // filteredParticipantsIds로 users 정보 모두 가져오기
-      let users = await Promise.all(
-        filteredParticipantsIds.map(async (userId: number) => {
-          try {
-            return await getUser(userId);
-          } catch (e) {
-            console.warn(
-              `[fetchLatestChatChannels] getUser failed for ${userId}`,
-              e
-            );
-            return null;
-          }
-        })
-      );
-      // users에서 null 값 제거
-      users = users.filter((user) => user !== null);
+    channelDocs.map(async ({ data, channelId, participantsIds }) => {
+      const users = participantsIds
+        .map((userId) => usersById.get(userId))
+        .filter(isUser);
 
       // ─── 추가: messages 서브컬렉션에서 마지막 메시지 조회 ───
       const messagesCol = collection(
@@ -100,7 +124,7 @@ export async function fetchLatestChatChannels(
         id: channelId,
         type: channelType,
         channelKey: data.channelKey,
-        participantsIds: filteredParticipantsIds,
+        participantsIds,
         channelOpenUserId: Number(data.channelOpenUserId),
         createdAt: data.createdAt as Timestamp,
         updatedAt: data.updatedAt as Timestamp,

@@ -20,11 +20,12 @@ export default function LatestChatDetail({
   const routeChannelId = Array.isArray(params.id) ? params.id[0] : params.id;
   const channelId = routeChannelId ?? "";
 
-  const store = useCurrentChannelStore();
   const setChannelInfo = useCurrentChannelStore(
     (state) => state.setChannelInfo
   );
-  const channelInfo = store.getChannelInfo(channelType);
+  const channelInfo = useCurrentChannelStore(
+    (state) => state.channels[channelType]
+  );
   const storedChannel = channelInfo?.channel || null;
   const shouldFetchChannel = !storedChannel || storedChannel.id !== channelId;
   const chatChannelQuery = useChatChannel(

@@ -25,9 +25,9 @@ export default function MessageList({
     isError,
     error
   } = useChatMessages(channelId, users, channelType);
-  const store = useCurrentChannelStore();
-  const channelInfo = store.getChannelInfo(channelType);
-  const openUser = channelInfo?.openUser || null;
+  const openUser = useCurrentChannelStore(
+    (state) => state.channels[channelType]?.openUser ?? null
+  );
   const router = useRouter();
 
   // 이미지 모달 상태 추가
@@ -168,5 +168,4 @@ export default function MessageList({
     </>
   );
 }
-
 

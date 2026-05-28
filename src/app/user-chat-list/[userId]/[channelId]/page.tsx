@@ -14,8 +14,9 @@ export default function UserLatestChatDetailPage() {
 
   console.log(userId, channelId);
 
-  const store = useUserCurrentChannelStore();
-  const channelInfo = store.getChannelInfo("model-matching");
+  const channelInfo = useUserCurrentChannelStore(
+    (state) => state.userChannels["model-matching"]
+  );
   const currentUser = channelInfo?.currentUser || null;
   const otherUser = channelInfo?.otherUser || null;
 
