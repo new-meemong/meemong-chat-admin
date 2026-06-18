@@ -20,6 +20,10 @@ export const CHAT_CHANNEL_COLLECTIONS: Record<
     channels: "hairConsultationChatChannels",
     userChannels: "userHairConsultationChatChannels",
     dailyCount: "hairConsultationDailyCount"
+  },
+  "job-posting": {
+    channels: "jobPostingChatChannels",
+    userChannels: "userJobPostingChatChannels",
+    dailyCount: "jobPostingDailyCount"
   }
 } as const;
-

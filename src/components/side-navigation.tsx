@@ -5,6 +5,25 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 
+const NAVIGATION_ITEMS = [
+  {
+    href: "/latest-model-matching-chat-list",
+    label: "최근 모델 대화 목록(100개)"
+  },
+  {
+    href: "/latest-hair-consultation-chat-list",
+    label: "최근 헤어 대화 목록(100개)"
+  },
+  {
+    href: "/latest-job-posting-chat-list",
+    label: "최근 구인 대화 목록(100개)"
+  },
+  {
+    href: "/daily-count",
+    label: "채팅방 데이터"
+  }
+];
+
 const SideNavigation = () => {
   return (
     <>
@@ -23,30 +42,16 @@ const SideNavigation = () => {
                 <h1 className="text-xl font-bold">미몽 채팅 어드민</h1>
               </div>
               <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/latest-model-matching-chat-list"
-                    className="block p-2 rounded hover:bg-gray-200 transition-colors"
-                  >
-                    최근 모델 대화 목록(100개)
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/latest-hair-consultation-chat-list"
-                    className="block p-2 rounded hover:bg-gray-200 transition-colors"
-                  >
-                    최근 헤어 대화 목록(100개)
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/daily-count"
-                    className="block p-2 rounded hover:bg-gray-200 transition-colors"
-                  >
-                    채팅방 데이터
-                  </Link>
-                </li>
+                {NAVIGATION_ITEMS.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="block p-2 rounded hover:bg-gray-200 transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </nav>
           </SheetContent>
@@ -58,30 +63,16 @@ const SideNavigation = () => {
           <h1 className="text-xl font-bold">미몽 채팅 어드민</h1>
         </div>
         <ul className="space-y-2">
-          <li>
-            <Link
-              href="/latest-model-matching-chat-list"
-              className="block p-2 rounded hover:bg-gray-200 transition-colors"
-            >
-              최근 모델 대화 목록(100개)
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/latest-hair-consultation-chat-list"
-              className="block p-2 rounded hover:bg-gray-200 transition-colors"
-            >
-              최근 헤어 대화 목록(100개)
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/daily-count"
-              className="block p-2 rounded hover:bg-gray-200 transition-colors"
-            >
-              채팅방 데이터
-            </Link>
-          </li>
+          {NAVIGATION_ITEMS.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="block p-2 rounded hover:bg-gray-200 transition-colors"
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </>

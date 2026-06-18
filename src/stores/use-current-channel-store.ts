@@ -36,7 +36,8 @@ export const useCurrentChannelStore = create<CurrentChannelState>()(
     (set, get) => ({
       channels: {
         "model-matching": null,
-        "hair-consultation": null
+        "hair-consultation": null,
+        "job-posting": null
       },
       setChannelInfo: (type, channel, users, openUser) =>
         set((state) => ({

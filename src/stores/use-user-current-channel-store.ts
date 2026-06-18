@@ -35,8 +35,9 @@ export const useUserCurrentChannelStore = create<UserCurrentChannelState>()(
   persist(
     (set, get) => ({
       userChannels: {
-        'model-matching': null,
-        'hair-consultation': null
+        "model-matching": null,
+        "hair-consultation": null,
+        "job-posting": null
       },
       setChannelInfo: (type, channel, currentUser, otherUser) =>
         set((state) => ({
