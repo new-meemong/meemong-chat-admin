@@ -16,6 +16,7 @@ import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 import { User } from "@/types/user";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/apis/users/get-user";
+import { sanitizeChatParticipantIds } from "./normalize-chat-participant-ids";
 
 export async function fetchChatChannel(
   channelId: string,
@@ -30,12 +31,9 @@ export async function fetchChatChannel(
   if (!channelSnap.exists()) return null;
 
   const data = channelSnap.data() as DocumentData;
-  const participantsIds = ((data.participantsIds ?? []) as Array<
-    number | string
-  >)
-    .filter((userId) => String(userId) !== "system")
-    .map((userId) => Number(userId))
-    .filter((userId) => Number.isFinite(userId));
+  const participantsIds = sanitizeChatParticipantIds(
+    Array.isArray(data.participantsIds) ? data.participantsIds : []
+  ).map(Number);
 
   const users = (
     await Promise.all(

@@ -76,7 +76,7 @@ const UserLatestChatChannels: React.FC<Props> = ({ userId }) => {
     otherUser.sex = otherUser.Sex;
 
     setChannelInfo(channelType, channel, currentUser, otherUser);
-    router.push(`/user-chat-list/${channel.userId}/${channel.channelId}`);
+    router.push(`/user-chat-list/${userId}/${channel.channelId}`);
   };
 
   return (

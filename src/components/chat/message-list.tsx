@@ -7,17 +7,28 @@ import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useRouter } from "next/navigation";
 import { ChatChannelType } from "@/types/chat";
+import { useChatReadStatus } from "@/hooks/use-chat-read-status";
+import ReadStatusChip from "@/components/chat/read-status-chip";
+import ReadStatusNotice from "@/components/chat/read-status-notice";
+import type { ReadStatusParticipantIssue } from "@/hooks/use-read-status-participants";
 
 interface MessageListProps {
   channelId: string;
   users: User[];
   channelType: ChatChannelType;
+  /** 읽음 판정 기준이 되는 채널 참여자 ID. users는 프로필 조회 실패 시 누락될 수 있어 사용하지 않는다. */
+  participantIds: Array<number | string>;
+  participantIssue: ReadStatusParticipantIssue;
+  isParticipantResolutionLoading: boolean;
 }
 
 export default function MessageList({
   channelId,
   users,
-  channelType
+  channelType,
+  participantIds,
+  participantIssue,
+  isParticipantResolutionLoading
 }: MessageListProps) {
   const {
     data: messages,
@@ -29,6 +40,18 @@ export default function MessageList({
     (state) => state.channels[channelType]?.openUser ?? null
   );
   const router = useRouter();
+  const { isMessageRead, readStatus } = useChatReadStatus(
+    channelId,
+    channelType,
+    participantIds
+  );
+  const readStatusNotice = (
+    <ReadStatusNotice
+      readStatus={readStatus}
+      participantIssue={participantIssue}
+      isParticipantResolutionLoading={isParticipantResolutionLoading}
+    />
+  );
 
   // 이미지 모달 상태 추가
   const [modalImage, setModalImage] = useState<string | null>(null);
@@ -36,7 +59,12 @@ export default function MessageList({
   if (isLoading) return <div>메시지 불러오는 중...</div>;
   if (isError) return <div>에러 발생: {error?.message}</div>;
   if (!messages || messages.length === 0)
-    return <div>메시지가 없습니다.</div>;
+    return (
+      <>
+        {readStatusNotice}
+        <div>메시지가 없습니다.</div>
+      </>
+    );
 
   return (
     <>
@@ -50,6 +78,7 @@ export default function MessageList({
         </button>
         <span className="text-base font-semibold">채팅방</span>
       </div>
+      {readStatusNotice}
       <ul className="flex flex-col space-y-2 mt-4 ">
         {messages.map((msg) => {
           const isSystemSender = String(msg.senderId) === "0";
@@ -62,6 +91,8 @@ export default function MessageList({
             isSystemType ||
             isWarningNormal ||
             isWarningStrong;
+          const isRead =
+            !isSystemMessage && isMessageRead(msg.senderId, msg.createdAt);
 
           const isOpenUser = openUser?.id === msg.senderId;
           // 정렬 클래스 결정
@@ -117,11 +148,14 @@ export default function MessageList({
                   <div className="text-sm sm:text-base">{msg.message}</div>
                 )}
                 <div
-                  className={`text-[12px] sm:text-xs mt-1 text-right ${
+                  className={`flex items-center justify-end gap-1.5 text-[12px] sm:text-xs mt-1 ${
                     isOpenUser ? "text-gray-200" : "text-gray-500"
                   }`}
                 >
-                  {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
+                  {isRead && <ReadStatusChip />}
+                  <span>
+                    {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
+                  </span>
                 </div>
               </div>
 
@@ -168,4 +202,3 @@ export default function MessageList({
     </>
   );
 }
-

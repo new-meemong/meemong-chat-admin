@@ -1,13 +1,14 @@
 "use client";
 
 import MessageList from "@/components/chat/message-list";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import SystemMessageButton from "@/components/admin/system-message-button";
 import { ChatChannelType } from "@/types/chat";
 import UserList from "@/components/chat/user-list";
 import { useChatChannel } from "@/hooks/use-chat-channel";
 import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useParams } from "next/navigation";
+import { useReadStatusParticipants } from "@/hooks/use-read-status-participants";
 
 interface LatestChatDetailProps {
   channelType: ChatChannelType;
@@ -51,6 +52,14 @@ export default function LatestChatDetail({
 
   const currentUser = users[0];
   const otherUser = users[1] || null;
+  const readStatusParticipants = useReadStatusParticipants(
+    channel,
+    channelType,
+    {
+      isLoading: shouldFetchChannel && chatChannelQuery.isLoading,
+      isError: shouldFetchChannel && chatChannelQuery.isError
+    }
+  );
 
   if (!channelId) {
     return <div className="p-4">채팅방 ID가 없습니다.</div>;
@@ -93,6 +102,11 @@ export default function LatestChatDetail({
         channelId={channel.id}
         users={users}
         channelType={channelType}
+        participantIds={readStatusParticipants.participantIds}
+        participantIssue={readStatusParticipants.participantIssue}
+        isParticipantResolutionLoading={
+          readStatusParticipants.isParticipantResolutionLoading
+        }
       />
     </div>
   );

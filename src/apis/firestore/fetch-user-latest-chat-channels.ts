@@ -61,6 +61,7 @@ export async function fetchUserLatestChatChannels(
           ...data,
           type: channelType,
           channelId,
+          userId: String(userId),
           currentUser,
           messageCount,
           openUserId

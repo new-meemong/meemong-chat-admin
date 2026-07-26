@@ -14,13 +14,12 @@ import { db } from "@/lib/firebase";
 import { getUser } from "@/apis/users/get-user";
 import { isAuthTokenError } from "@/apis/fetch";
 import { User } from "@/types/user";
+import { sanitizeChatParticipantIds } from "./normalize-chat-participant-ids";
 
 const getParticipantIds = (participantsIds: unknown): number[] => {
   if (!Array.isArray(participantsIds)) return [];
 
-  return participantsIds
-    .map((userId) => Number(userId))
-    .filter((userId) => Number.isFinite(userId));
+  return sanitizeChatParticipantIds(participantsIds).map(Number);
 };
 
 const isUser = (user: User | undefined): user is User => user !== undefined;

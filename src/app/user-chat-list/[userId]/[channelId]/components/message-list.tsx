@@ -6,17 +6,45 @@ import { User } from "@/types/user";
 import { User as UserIcon } from "lucide-react";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useRouter } from "next/navigation";
+import { useChatReadStatus } from "@/hooks/use-chat-read-status";
+import ReadStatusChip from "@/components/chat/read-status-chip";
+import ReadStatusNotice from "@/components/chat/read-status-notice";
+import type { ReadStatusParticipantIssue } from "@/hooks/use-read-status-participants";
 
 interface MessageListProps {
   channelId: string;
   currentUser: User;
   otherUser: Partial<User>;
+  participantIds: Array<number | string>;
+  participantIssue: ReadStatusParticipantIssue;
+  isParticipantResolutionLoading: boolean;
+}
+
+// otherUser id 안전 분기 (any 사용하지 않음)
+function getOtherUserId(user: Partial<User>): number | undefined {
+  if (
+    typeof user.id === "number" &&
+    Number.isFinite(user.id) &&
+    user.id > 0
+  ) {
+    return user.id;
+  }
+
+  if (typeof (user as { UserID?: string }).UserID === "string") {
+    const parsed = Number((user as { UserID: string }).UserID);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  }
+
+  return undefined;
 }
 
 export default function MessageList({
   channelId,
   currentUser,
-  otherUser
+  otherUser,
+  participantIds,
+  participantIssue,
+  isParticipantResolutionLoading
 }: MessageListProps) {
   // currentUser, otherUser를 users 배열로 만들어서 useChatMessages에 전달
   const users = [currentUser, otherUser as User];
@@ -28,13 +56,35 @@ export default function MessageList({
     error
   } = useChatMessages(channelId, users, channelType);
   const router = useRouter();
+  const otherUserId = React.useMemo(
+    () => getOtherUserId(otherUser),
+    [otherUser]
+  );
+  const { isMessageRead, readStatus } = useChatReadStatus(
+    channelId,
+    channelType,
+    participantIds
+  );
+  const readStatusNotice = (
+    <ReadStatusNotice
+      readStatus={readStatus}
+      participantIssue={participantIssue}
+      isParticipantResolutionLoading={isParticipantResolutionLoading}
+    />
+  );
 
   // 이미지 모달 상태
   const [modalImage, setModalImage] = useState<string | null>(null);
 
   if (isLoading) return <div>메시지 불러오는 중...</div>;
   if (isError) return <div>에러 발생: {error?.message}</div>;
-  if (!messages || messages.length === 0) return <div>메시지가 없습니다.</div>;
+  if (!messages || messages.length === 0)
+    return (
+      <>
+        {readStatusNotice}
+        <div>메시지가 없습니다.</div>
+      </>
+    );
 
   return (
     <>
@@ -48,6 +98,7 @@ export default function MessageList({
         </button>
         <span className="text-base font-semibold">채팅방</span>
       </div>
+      {readStatusNotice}
       <ul className="flex flex-col space-y-2 mt-4 ">
         {messages.map((msg) => {
           const isSystemSender = String(msg.senderId) === "0";
@@ -60,17 +111,9 @@ export default function MessageList({
             isSystemType ||
             isWarningNormal ||
             isWarningStrong;
+          const isRead =
+            !isSystemMessage && isMessageRead(msg.senderId, msg.createdAt);
           const isCurrentUser = msg.senderId === currentUser.id;
-          // otherUser id, DisplayName, role 안전 분기 (any 사용하지 않음)
-          function getOtherUserId(user: Partial<User>): number | undefined {
-            if (typeof user.id === "number") return user.id;
-            if (typeof (user as { UserID?: string }).UserID === "string") {
-              const parsed = Number((user as { UserID: string }).UserID);
-              return isNaN(parsed) ? undefined : parsed;
-            }
-            return undefined;
-          }
-          const otherUserId = getOtherUserId(otherUser);
           const isOtherUser = msg.senderId === otherUserId;
           // 정렬 클래스 결정
           const alignClass = isSystemMessage
@@ -129,11 +172,14 @@ export default function MessageList({
                   <div className="text-sm sm:text-base">{msg.message}</div>
                 )}
                 <div
-                  className={`text-[12px] sm:text-xs mt-1 text-right ${
+                  className={`flex items-center justify-end gap-1.5 text-[12px] sm:text-xs mt-1 ${
                     isCurrentUser ? "text-gray-200" : "text-gray-500"
                   }`}
                 >
-                  {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
+                  {isRead && <ReadStatusChip />}
+                  <span>
+                    {msg.createdAt?.toDate?.().toLocaleString?.() ?? ""}
+                  </span>
                 </div>
               </div>
 

@@ -9,8 +9,9 @@ import { ChatMessage } from "./chat-message";
 export interface ChatChannel {
   id: string; // 채널 문서 ID (Firestore 문서 ID)
   type: ChatChannelType; // 채널 타입 구분자
-  channelKey: string; // `${channelType}_${참여자ID들.정렬().join('_')}`
-  participantsIds: number[]; // 참여자 ID 목록 (정렬된 상태)
+  // `${채널 컬렉션명}_${최초 참여자ID들...}` 형식이며 구인 채널은 공고/이력서 ID가 뒤에 붙는다.
+  channelKey: string;
+  participantsIds: number[]; // Firestore에 저장된 순서를 보존한 참여자 ID 목록
   channelOpenUserId: number; // 채널을 연 사용자 ID
   createdAt: Timestamp; // 생성 시간
   updatedAt: Timestamp; // 마지막 업데이트 시간
@@ -19,5 +20,3 @@ export interface ChatChannel {
   lastMessage: ChatMessage | null;
   messageCount: number;
 }
-
-
