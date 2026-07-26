@@ -1,5 +1,5 @@
 import { getDailyCountsByPeriod } from "@/apis/firestore/get-daily-counts";
-import { ChatChannelType } from "@/types/chat";
+import { DailyCountChannelType } from "@/types/chat";
 import { useQuery } from "@tanstack/react-query";
 
 interface DailyCountItem {
@@ -25,7 +25,7 @@ interface UseDailyCountListQueryResult {
 export function useDailyCountListQuery(
   startDate: string,
   endDate: string,
-  channelType: ChatChannelType = 'model-matching'
+  channelType: DailyCountChannelType = 'model-matching'
 ): UseDailyCountListQueryResult {
   const query = useQuery<DailyCountItem[], Error>({
     queryKey: ["dailyCountList", channelType, startDate, endDate],

@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { ChatChannelType } from "@/types/chat";
+import { DailyCountChannelType } from "@/types/chat";
 import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 
 /**
@@ -20,7 +20,7 @@ import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
  */
 export async function countDailyActiveChatChannelsByDate(
   dateString: string,
-  channelType: ChatChannelType = 'model-matching'
+  channelType: DailyCountChannelType = 'model-matching'
 ): Promise<number> {
   const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
   // 1) 날짜 범위 계산

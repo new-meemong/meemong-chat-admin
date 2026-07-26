@@ -19,6 +19,10 @@ const NAVIGATION_ITEMS = [
     label: "최근 구인 대화 목록(100개)"
   },
   {
+    href: "/latest-review-special-chat-list",
+    label: "최근 리뷰특가 대화 목록(100개)"
+  },
+  {
     href: "/daily-count",
     label: "채팅방 데이터"
   }

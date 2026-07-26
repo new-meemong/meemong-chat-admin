@@ -1,7 +1,7 @@
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { ChatChannelType } from "@/types/chat";
+import { DailyCountChannelType } from "@/types/chat";
 import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 
 /**
@@ -13,7 +13,7 @@ import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 export async function getDailyCountsByPeriod(
   startDate: string,
   endDate: string,
-  channelType: ChatChannelType = 'model-matching'
+  channelType: DailyCountChannelType = 'model-matching'
 ): Promise<
   {
     id: string;

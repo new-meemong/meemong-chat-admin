@@ -14,7 +14,7 @@ import {
 
 import { countDailyActiveChatChannelsByDate } from "./post-active-channel-daily-count";
 import { db } from "@/lib/firebase";
-import { ChatChannelType } from "@/types/chat";
+import { DailyCountChannelType } from "@/types/chat";
 import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 
 /**
@@ -24,7 +24,7 @@ import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
  */
 export async function countDailyNewChatChannelsByDate(
   dateString: string,
-  channelType: ChatChannelType = 'model-matching'
+  channelType: DailyCountChannelType = 'model-matching'
 ): Promise<number> {
   const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
   // 입력받은 날짜의 00:00:00 ~ 23:59:59 범위 계산
@@ -67,7 +67,7 @@ export async function countDailyNewChatChannelsByDate(
  * @param channelType 채널 타입 (기본값: 'model-matching')
  */
 export async function countDailyNewChatChannels(
-  channelType: ChatChannelType = 'model-matching'
+  channelType: DailyCountChannelType = 'model-matching'
 ): Promise<void> {
   const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
 
