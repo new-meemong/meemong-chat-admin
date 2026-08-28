@@ -1,5 +1,25 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Chat v2 contract
+
+This dashboard supports Firestore chat schema v2 only. It does not parse or
+display schema v1 channels.
+
+- Service-wide recent lists read v2 documents from the four authoritative chat
+  channel collections and use immutable `participantIds` for administrator
+  visibility and read-status checks. Invalid v2 documents are isolated and
+  shown as warning rows instead of failing the entire list.
+- User-specific lists read `users/{userId}/chatListItems`, preserve the app's
+  `isPinned`, `sortAt`, and document-ID ordering, and exclude projected schema
+  v1 items.
+- System messages write the message, v2 main-channel activity timestamps, and
+  every active participant's service metadata in one Firestore batch. The Node
+  unread badge and push notification run afterward; pushes carry the exact
+  `chatChannelId`, `sourceCollection`, and `schemaVersion: 2`.
+- Daily counts are recalculated from validated v2 channels and stored with
+  `schemaVersion: 2` on KST day boundaries. Invalid document counts are stored
+  and shown, while earlier aggregate documents are not shown.
+
 ## Getting Started
 
 The app gets a fresh JWT by calling the webview login API before the first

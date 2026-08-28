@@ -11,7 +11,10 @@ import {
 
 import { db } from "@/lib/firebase";
 import { DailyCountChannelType } from "@/types/chat";
-import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
+import { CHAT_V2_SCHEMA_VERSION, CHAT_V2_SERVICES } from "./constants";
+import { isV2Document, parseChatV2ChannelIdentity } from "./chat-v2-contract";
+import { kstDayRange } from "./daily-count-date";
+import type { DailyChannelCountResult } from "./daily-count-contract";
 
 /**
  * 특정 날짜에 메시지가 1개 이상 존재하는 채널 수 조회
@@ -21,12 +24,9 @@ import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
 export async function countDailyActiveChatChannelsByDate(
   dateString: string,
   channelType: DailyCountChannelType = 'model-matching'
-): Promise<number> {
-  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
-  // 1) 날짜 범위 계산
-  const [year, month, day] = dateString.split("-").map(Number);
-  const start = new Date(year, month - 1, day, 0, 0, 0);
-  const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+): Promise<DailyChannelCountResult> {
+  const config = CHAT_V2_SERVICES[channelType];
+  const { start, end } = kstDayRange(dateString);
 
   // 2) collectionGroup 쿼리
   const q = query(
@@ -40,33 +40,53 @@ export async function countDailyActiveChatChannelsByDate(
   // 3) 부모 채널 ID만 추출해 Set으로 중복 제거
   const channelIdSet = new Set<string>();
   snap.docs.forEach((doc) => {
-    // 메시지 문서 경로: {collections.channels}/{channelId}/messages/{messageId}
-    const path = doc.ref.path;
-    // 해당 channelType의 컬렉션 경로인지 확인
-    if (path.includes(collections.channels)) {
-      const channelId = doc.ref.parent.parent?.id;
-      if (channelId) channelIdSet.add(channelId);
+    const channelReference = doc.ref.parent.parent;
+    if (channelReference?.parent.id === config.sourceCollection) {
+      channelIdSet.add(channelReference.id);
     }
   });
 
-  // 4) dailyCount 문서에 dailyTotalActiveCount 저장
-  const dailyDocRef = doc(db, collections.dailyCount, dateString);
-  const dailyDocSnap = await getDoc(dailyDocRef);
-  if (!dailyDocSnap.exists()) {
-    await setDoc(dailyDocRef, {
-      dailyTotalActiveCount: channelIdSet.size,
-      createdAt: Timestamp.now(),
-      baseDate: dateString
-    });
-  } else {
-    await setDoc(
-      dailyDocRef,
-      {
-        dailyTotalActiveCount: channelIdSet.size
-      },
-      { merge: true }
+  const validationResults =
+    await Promise.all(
+      [...channelIdSet].map(async (channelId) => {
+        const snapshot = await getDoc(
+          doc(db, config.sourceCollection, channelId)
+        );
+        if (!snapshot.exists() || !isV2Document(snapshot.data())) return null;
+        try {
+          parseChatV2ChannelIdentity({
+            documentId: snapshot.id,
+            chatType: channelType,
+            rawData: snapshot.data()
+          });
+          return "valid" as const;
+        } catch (error) {
+          console.warn(
+            `[countDailyActiveChatChannelsByDate] invalid v2 channel: ${channelId}`,
+            error
+          );
+          return "invalid" as const;
+        }
+      })
     );
-  }
+  const count = validationResults.filter((result) => result === "valid").length;
+  const invalidDocumentCount = validationResults.filter(
+    (result) => result === "invalid"
+  ).length;
 
-  return channelIdSet.size;
+  // 단독 활성 집계와 신규→활성 갱신이 같은 문서 shape을 만들도록 merge한다.
+  const dailyDocRef = doc(db, config.dailyCount, dateString);
+  await setDoc(
+    dailyDocRef,
+    {
+      schemaVersion: CHAT_V2_SCHEMA_VERSION,
+      dailyTotalActiveCount: count,
+      dailyInvalidActiveChannelCount: invalidDocumentCount,
+      updatedAt: Timestamp.now(),
+      baseDate: dateString
+    },
+    { merge: true }
+  );
+
+  return { count, invalidDocumentCount };
 }

@@ -10,25 +10,20 @@ import { ChatChannelType } from "@/types/chat";
 import { useChatReadStatus } from "@/hooks/use-chat-read-status";
 import ReadStatusChip from "@/components/chat/read-status-chip";
 import ReadStatusNotice from "@/components/chat/read-status-notice";
-import type { ReadStatusParticipantIssue } from "@/hooks/use-read-status-participants";
 
 interface MessageListProps {
   channelId: string;
   users: User[];
   channelType: ChatChannelType;
-  /** 읽음 판정 기준이 되는 채널 참여자 ID. users는 프로필 조회 실패 시 누락될 수 있어 사용하지 않는다. */
+  /** v2 채널 생성 당시의 불변 참여자 쌍. */
   participantIds: Array<number | string>;
-  participantIssue: ReadStatusParticipantIssue;
-  isParticipantResolutionLoading: boolean;
 }
 
 export default function MessageList({
   channelId,
   users,
   channelType,
-  participantIds,
-  participantIssue,
-  isParticipantResolutionLoading
+  participantIds
 }: MessageListProps) {
   const {
     data: messages,
@@ -45,13 +40,7 @@ export default function MessageList({
     channelType,
     participantIds
   );
-  const readStatusNotice = (
-    <ReadStatusNotice
-      readStatus={readStatus}
-      participantIssue={participantIssue}
-      isParticipantResolutionLoading={isParticipantResolutionLoading}
-    />
-  );
+  const readStatusNotice = <ReadStatusNotice readStatus={readStatus} />;
 
   // 이미지 모달 상태 추가
   const [modalImage, setModalImage] = useState<string | null>(null);

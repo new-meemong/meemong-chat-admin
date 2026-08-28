@@ -1,6 +1,7 @@
 "use client";
 
 import MessageList from "@/components/chat/message-list";
+import ChatV2StartInsightBadges from "@/components/chat/chat-v2-start-insight-badges";
 import { useEffect } from "react";
 import SystemMessageButton from "@/components/admin/system-message-button";
 import { ChatChannelType } from "@/types/chat";
@@ -8,7 +9,6 @@ import UserList from "@/components/chat/user-list";
 import { useChatChannel } from "@/hooks/use-chat-channel";
 import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useParams } from "next/navigation";
-import { useReadStatusParticipants } from "@/hooks/use-read-status-participants";
 
 interface LatestChatDetailProps {
   channelType: ChatChannelType;
@@ -50,17 +50,6 @@ export default function LatestChatDetail({
     setChannelInfo(channelType, fetchedChannel, fetchedChannel.users, openUser);
   }, [channelType, fetchedChannel, setChannelInfo]);
 
-  const currentUser = users[0];
-  const otherUser = users[1] || null;
-  const readStatusParticipants = useReadStatusParticipants(
-    channel,
-    channelType,
-    {
-      isLoading: shouldFetchChannel && chatChannelQuery.isLoading,
-      isError: shouldFetchChannel && chatChannelQuery.isError
-    }
-  );
-
   if (!channelId) {
     return <div className="p-4">채팅방 ID가 없습니다.</div>;
   }
@@ -89,11 +78,12 @@ export default function LatestChatDetail({
       <h1 className="hidden md:block text-2xl font-bold mb-4">
         채팅 상세 페이지
       </h1>
-      {currentUser && (
+      <div className="mb-3 flex flex-wrap items-center gap-1.5 text-xs">
+        <ChatV2StartInsightBadges channel={channel} />
+      </div>
+      {channel.activeParticipantIds.length > 0 && (
         <SystemMessageButton
           channelId={channel.id}
-          currentUser={currentUser}
-          otherUser={otherUser}
           channelType={channelType}
         />
       )}
@@ -102,11 +92,7 @@ export default function LatestChatDetail({
         channelId={channel.id}
         users={users}
         channelType={channelType}
-        participantIds={readStatusParticipants.participantIds}
-        participantIssue={readStatusParticipants.participantIssue}
-        isParticipantResolutionLoading={
-          readStatusParticipants.isParticipantResolutionLoading
-        }
+        participantIds={channel.participantIds}
       />
     </div>
   );

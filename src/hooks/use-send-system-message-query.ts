@@ -8,16 +8,12 @@ export function useSendSystemMessage() {
       channelId,
       message,
       type,
-      user1Id,
-      user2Id,
       channelType = 'model-matching' as ChatChannelType
     }: {
       channelId: string;
       message: string;
       type: string;
-      user1Id: string;
-      user2Id: string;
       channelType?: ChatChannelType;
-    }) => postSystemMessageToChannel(channelId, message, type, user1Id, user2Id, channelType)
+    }) => postSystemMessageToChannel(channelId, message, type, channelType)
   });
 }

@@ -7,6 +7,8 @@ interface DailyCountItem {
   dailyTotalCount: number;
   baseDate: string;
   dailyTotalActiveCount: number;
+  dailyInvalidNewChannelCount: number;
+  dailyInvalidActiveChannelCount: number;
 }
 
 interface UseDailyCountListQueryResult {

@@ -2,7 +2,8 @@ import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { DailyCountChannelType } from "@/types/chat";
-import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
+import { CHAT_V2_SERVICES } from "./constants";
+import { isCompleteV2DailyCountDocument } from "./daily-count-contract";
 
 /**
  * 주어진 기간(YYYY-MM-DD ~ YYYY-MM-DD)의 dailyCount 문서를 baseDate 오름차순으로 모두 가져옵니다.
@@ -19,12 +20,14 @@ export async function getDailyCountsByPeriod(
     id: string;
     dailyTotalCount: number;
     dailyTotalActiveCount: number;
+    dailyInvalidNewChannelCount: number;
+    dailyInvalidActiveChannelCount: number;
     baseDate: string;
   }[]
 > {
-  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
+  const { dailyCount } = CHAT_V2_SERVICES[channelType];
   // baseDate 기준 범위 쿼리 및 오름차순 정렬
-  const dailyCountCol = collection(db, collections.dailyCount);
+  const dailyCountCol = collection(db, dailyCount);
   const q = query(
     dailyCountCol,
     where("baseDate", ">=", startDate),
@@ -33,10 +36,16 @@ export async function getDailyCountsByPeriod(
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    dailyTotalCount: doc.data().dailyTotalCount ?? 0,
-    dailyTotalActiveCount: doc.data().dailyTotalActiveCount ?? 0,
-    baseDate: doc.data().baseDate
-  }));
+  return snapshot.docs
+    .filter((document) => isCompleteV2DailyCountDocument(document.data()))
+    .map((document) => ({
+      id: document.id,
+      dailyTotalCount: document.data().dailyTotalCount ?? 0,
+      dailyTotalActiveCount: document.data().dailyTotalActiveCount ?? 0,
+      dailyInvalidNewChannelCount:
+        document.data().dailyInvalidNewChannelCount ?? 0,
+      dailyInvalidActiveChannelCount:
+        document.data().dailyInvalidActiveChannelCount ?? 0,
+      baseDate: document.data().baseDate
+    }));
 }

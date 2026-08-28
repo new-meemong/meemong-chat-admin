@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Timestamp, doc, onSnapshot } from "firebase/firestore";
 
-import { CHAT_CHANNEL_COLLECTIONS } from "@/apis/firestore/constants";
+import { CHAT_V2_SERVICES } from "@/apis/firestore/constants";
 import { ChatChannelType } from "@/types/chat";
 import { db } from "@/lib/firebase";
 import { normalizeChatParticipantIds } from "@/apis/firestore/normalize-chat-participant-ids";
@@ -155,7 +155,7 @@ export function useChatReadStatus(
     if (!channelId || userIds.length !== 2) return;
 
     let isActive = true;
-    const { userChannels } = CHAT_CHANNEL_COLLECTIONS[channelType];
+    const { userChannelCollection } = CHAT_V2_SERVICES[channelType];
     const unsubscribesByUserId: Record<string, () => void> = {};
     const retryTimeoutsByUserId: Record<
       string,
@@ -212,7 +212,7 @@ export function useChatReadStatus(
       hasServerResponseByUserId[userId] = false;
       armResponseTimeout(userId);
       unsubscribesByUserId[userId] = onSnapshot(
-        doc(db, "users", userId, userChannels, channelId),
+        doc(db, "users", userId, userChannelCollection, channelId),
         { includeMetadataChanges: true },
         (snapshot) => {
           if (!isActive) return;

@@ -1,6 +1,5 @@
 import { ChatChannel, ChatChannelType, ChatMessage } from "@/types/chat";
 import {
-  DocumentData,
   Timestamp,
   collection,
   doc,
@@ -12,11 +11,22 @@ import {
   query
 } from "firebase/firestore";
 
-import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
+import { CHAT_V2_SERVICES } from "./constants";
 import { User } from "@/types/user";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/apis/users/get-user";
-import { sanitizeChatParticipantIds } from "./normalize-chat-participant-ids";
+import { isAuthTokenError } from "@/apis/fetch";
+import {
+  parseChatV2ChannelIdentity,
+  parseChatV2ChannelInsights
+} from "./chat-v2-contract";
+
+function requiredTimestamp(value: unknown, fieldName: string): Timestamp {
+  if (!(value instanceof Timestamp)) {
+    throw new Error(`v2 채널의 ${fieldName} 값이 Timestamp가 아닙니다.`);
+  }
+  return value;
+}
 
 export async function fetchChatChannel(
   channelId: string,
@@ -24,74 +34,65 @@ export async function fetchChatChannel(
 ): Promise<ChatChannel | null> {
   if (!channelId) return null;
 
-  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
-  const channelRef = doc(db, collections.channels, channelId);
-  const channelSnap = await getDoc(channelRef);
+  const { sourceCollection } = CHAT_V2_SERVICES[channelType];
+  const channelSnapshot = await getDoc(doc(db, sourceCollection, channelId));
+  if (!channelSnapshot.exists()) return null;
 
-  if (!channelSnap.exists()) return null;
-
-  const data = channelSnap.data() as DocumentData;
-  const participantsIds = sanitizeChatParticipantIds(
-    Array.isArray(data.participantsIds) ? data.participantsIds : []
-  ).map(Number);
-
+  const data = channelSnapshot.data();
+  const identity = parseChatV2ChannelIdentity({
+    documentId: channelSnapshot.id,
+    chatType: channelType,
+    rawData: data
+  });
+  const insights = parseChatV2ChannelInsights(data, identity.postType);
   const users = (
     await Promise.all(
-      participantsIds.map(async (userId) => {
+      identity.participantIds.map(async (userId) => {
         try {
           return await getUser(userId);
         } catch (error) {
-          console.warn(`[fetchChatChannel] getUser failed for ${userId}`, error);
+          if (isAuthTokenError(error)) throw error;
+          console.warn(`[fetchChatChannel] getUser failed: ${userId}`, error);
           return null;
         }
       })
     )
   ).filter((user): user is User => user !== null);
 
-  const messagesCol = collection(
-    db,
-    collections.channels,
-    channelId,
-    "messages"
-  );
-  const lastMessageQuery = query(
-    messagesCol,
-    orderBy("createdAt", "desc"),
-    limit(1)
-  );
-  const [lastMessageSnap, countSnap] = await Promise.all([
-    getDocs(lastMessageQuery),
-    getCountFromServer(messagesCol)
+  const messages = collection(db, sourceCollection, channelId, "messages");
+  const [lastMessageSnapshot, countSnapshot] = await Promise.all([
+    getDocs(query(messages, orderBy("createdAt", "desc"), limit(1))),
+    getCountFromServer(messages)
   ]);
 
   let lastMessage: ChatMessage | null = null;
-  if (!lastMessageSnap.empty) {
-    const messageDoc = lastMessageSnap.docs[0];
-    const messageData = messageDoc.data();
+  if (!lastMessageSnapshot.empty) {
+    const messageDocument = lastMessageSnapshot.docs[0];
+    const messageData = messageDocument.data();
     const senderId = Number(messageData.senderId);
-
     lastMessage = {
-      id: messageDoc.id,
-      message: messageData.message,
-      messageType: messageData.messageType,
-      metaPathList: messageData.metaPathList || [],
+      id: messageDocument.id,
+      message: String(messageData.message ?? ""),
+      messageType: String(messageData.messageType ?? ""),
+      metaPathList: Array.isArray(messageData.metaPathList)
+        ? messageData.metaPathList
+        : [],
       senderId,
-      createdAt: messageData.createdAt as Timestamp,
-      updatedAt: messageData.updatedAt as Timestamp,
-      user: users.find((user) => user.id === senderId) || null
+      createdAt: requiredTimestamp(messageData.createdAt, "message.createdAt"),
+      updatedAt: requiredTimestamp(messageData.updatedAt, "message.updatedAt"),
+      user: users.find((user) => user.id === senderId) ?? null
     };
   }
 
   return {
-    id: channelSnap.id,
+    id: channelSnapshot.id,
     type: channelType,
-    channelKey: data.channelKey,
-    participantsIds,
-    channelOpenUserId: Number(data.channelOpenUserId),
-    createdAt: data.createdAt as Timestamp,
-    updatedAt: data.updatedAt as Timestamp,
+    ...identity,
+    ...insights,
+    createdAt: requiredTimestamp(data.createdAt, "createdAt"),
+    updatedAt: requiredTimestamp(data.updatedAt, "updatedAt"),
     users,
     lastMessage,
-    messageCount: countSnap.data().count
+    messageCount: countSnapshot.data().count
   };
 }

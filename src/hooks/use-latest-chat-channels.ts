@@ -1,9 +1,13 @@
-import { ChatChannel, ChatChannelType } from "@/types/chat";
+import {
+  ChatChannelType,
+  ChatV2DocumentIssue,
+  LatestChatChannel
+} from "@/types/chat";
 import { fetchLatestChatChannels } from "@/apis/firestore/fetch-latest-chat-channels";
 import { useQuery } from "@tanstack/react-query";
 
 interface UseLatestChatChannelsResult {
-  data: ChatChannel[] | undefined;
+  data: Array<LatestChatChannel | ChatV2DocumentIssue> | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -17,7 +21,7 @@ interface UseLatestChatChannelsResult {
 export function useLatestChatChannels(
   channelType: ChatChannelType = 'model-matching'
 ): UseLatestChatChannelsResult {
-  const query = useQuery<ChatChannel[], Error>({
+  const query = useQuery<Array<LatestChatChannel | ChatV2DocumentIssue>, Error>({
     queryKey: ["latestChatChannels", channelType],
     queryFn: () => fetchLatestChatChannels(channelType),
     staleTime: 1000 * 60 * 10, // 10분 동안은 추가 요청 X

@@ -1,7 +1,4 @@
-import {
-  ChatMessageType,
-  sendPushNotification
-} from "@/apis/push-notification";
+import { sendPushNotification } from "@/apis/push-notification";
 import {
   Dialog,
   DialogContent,
@@ -20,10 +17,10 @@ import {
 import { Button } from "../ui/button";
 import { CardDescription } from "../ui/card";
 import { ChatChannelType } from "@/types/chat";
-import { User } from "@/types/user";
 import { toast } from "sonner";
 import { useSendSystemMessage } from "@/hooks/use-send-system-message-query";
 import { useState } from "react";
+import { incrementChatUnreadCount } from "@/apis/chatting/increment-chat-unread-count";
 
 // 메시지 리스트와 안내 문구를 객체 배열로 관리
 const MESSAGE_OPTIONS = [
@@ -79,8 +76,6 @@ const MESSAGE_OPTIONS = [
 
 interface Props {
   channelId: string;
-  currentUser: User;
-  otherUser: Partial<User> | null;
   channelType?: ChatChannelType;
 }
 
@@ -110,8 +105,6 @@ function MessageDescription({
 
 export default function SystemMessageButton({
   channelId,
-  currentUser,
-  otherUser,
   channelType = "model-matching"
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -135,50 +128,54 @@ export default function SystemMessageButton({
   const handleSend = async () => {
     if (!selectedMessage) return;
     try {
-      await sendSystemMessage.mutateAsync({
+      const target = await sendSystemMessage.mutateAsync({
         channelId,
         message: selectedMessage.value,
         type: selectedMessage.type,
-        user1Id: String(currentUser.id),
-        user2Id: otherUser ? String(otherUser.id) : "",
         channelType
       });
 
-      const promises = [];
-
-      if (currentUser?.id) {
-        promises.push(
-          sendPushNotification(
-            String(currentUser.id),
-            selectedMessage.value,
-            ChatMessageType.SYSTEM
+      const [unreadResults, pushResults] = await Promise.all([
+        Promise.allSettled(
+          target.participantIds.map((userId) =>
+            incrementChatUnreadCount(userId)
           )
-        );
-      }
-
-      if (otherUser?.id) {
-        promises.push(
-          sendPushNotification(
-            String(otherUser.id),
-            selectedMessage.value,
-            ChatMessageType.SYSTEM
+        ),
+        Promise.allSettled(
+          target.participantIds.map((userId) =>
+            sendPushNotification({
+              userId,
+              message: selectedMessage.value,
+              channelId,
+              channelType
+            })
           )
-        );
-      }
-
-      if (promises.length > 0) {
-        await Promise.all(promises);
-      }
+        )
+      ]);
 
       setConfirmOpen(false);
       setOpen(false);
       setSelectedMessage(null);
-      toast.success("시스템 메시지가 전송되었고 푸시알림이 발송되었습니다.");
+      const failedPushCount = pushResults.filter(
+        (result) => result.status === "rejected"
+      ).length;
+      const failedUnreadCount = unreadResults.filter(
+        (result) => result.status === "rejected"
+      ).length;
+      if (failedPushCount > 0 || failedUnreadCount > 0) {
+        toast.warning(
+          `시스템 메시지는 저장됐지만 배지 갱신 ${failedUnreadCount}건, 푸시 ${failedPushCount}건이 실패했습니다.`
+        );
+      } else {
+        toast.success(
+          "시스템 메시지, 미읽음 배지 갱신, 푸시알림이 모두 처리되었습니다."
+        );
+      }
       setTimeout(() => {
         window.location.reload();
       }, 100);
     } catch {
-      toast.error("메시지 또는 푸시알림 전송에 실패했습니다.");
+      toast.error("시스템 메시지 저장에 실패했습니다.");
     }
   };
 

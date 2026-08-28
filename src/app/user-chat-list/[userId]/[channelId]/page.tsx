@@ -1,47 +1,52 @@
 "use client";
 
-import MessageList from "./components/message-list";
-import SystemMessageButton from "@/components/admin/system-message-button";
-import UserList from "./components/user-list";
-import { useParams } from "next/navigation";
-import { useUserCurrentChannelStore } from "@/stores/use-user-current-channel-store";
 import Link from "next/link";
-import { useChatReadStatusChannel } from "@/hooks/use-chat-read-status-channel";
-import { useReadStatusParticipants } from "@/hooks/use-read-status-participants";
+import { useParams, useSearchParams } from "next/navigation";
 
-export default function UserLatestChatDetailPage() {
-  const params = useParams();
-  const userId = params.userId as string;
-  const channelId = params.channelId as string;
+import MessageList from "@/components/chat/message-list";
+import ChatV2StartInsightBadges from "@/components/chat/chat-v2-start-insight-badges";
+import SystemMessageButton from "@/components/admin/system-message-button";
+import UserList from "@/components/chat/user-list";
+import { isChatChannelType } from "@/apis/firestore/constants";
+import { useChatChannel } from "@/hooks/use-chat-channel";
 
-  const channelInfo = useUserCurrentChannelStore(
-    (state) => state.userChannels["model-matching"]
-  );
-  const currentUser = channelInfo?.currentUser || null;
-  const otherUser = channelInfo?.otherUser || null;
-  const storedChannelId = channelInfo?.channel?.channelId;
-  const storedUserId = channelInfo?.channel?.userId;
-  const isMatchingChannel =
-    storedChannelId === channelId && String(storedUserId) === userId;
-  const channelQuery = useChatReadStatusChannel(
-    isMatchingChannel ? channelId : "",
-    "model-matching"
-  );
-  const readStatusParticipants = useReadStatusParticipants(
-    channelQuery.data,
-    "model-matching",
-    {
-      isLoading: channelQuery.isLoading,
-      isError: channelQuery.isError
-    }
+export default function UserChatV2DetailPage() {
+  const params = useParams<{ userId: string; channelId: string }>();
+  const searchParams = useSearchParams();
+  const rawChannelType = searchParams.get("channelType") ?? "";
+  const channelType = isChatChannelType(rawChannelType)
+    ? rawChannelType
+    : null;
+  const channelQuery = useChatChannel(
+    channelType ? params.channelId : "",
+    channelType ?? "model-matching"
   );
 
-  if (!currentUser || !otherUser || !isMatchingChannel) {
+  if (!channelType) {
+    return <div className="p-4">v2 채널 타입이 없거나 올바르지 않습니다.</div>;
+  }
+  if (channelQuery.isLoading) {
+    return <div className="p-4">v2 채팅방을 불러오는 중...</div>;
+  }
+  if (channelQuery.isError) {
     return (
       <div className="p-4">
-        <p>채팅방 정보가 현재 URL과 일치하지 않습니다.</p>
+        v2 채팅방을 가져오는 중 오류가 발생했습니다.
+        <p className="mt-2 text-sm text-gray-500">
+          {channelQuery.error.message}
+        </p>
+      </div>
+    );
+  }
+
+  const channel = channelQuery.data;
+  const numericUserId = Number(params.userId);
+  if (!channel || !channel.participantIds.includes(numericUserId)) {
+    return (
+      <div className="p-4">
+        <p>이 사용자에게 속한 v2 채팅방을 찾을 수 없습니다.</p>
         <Link
-          href={`/user-chat-list/${userId}`}
+          href={`/user-chat-list/${params.userId}`}
           className="mt-3 inline-flex rounded bg-slate-700 px-3 py-2 text-sm text-white"
         >
           사용자 채팅 목록으로 돌아가기
@@ -52,22 +57,18 @@ export default function UserLatestChatDetailPage() {
 
   return (
     <div className="p-4">
-      <SystemMessageButton
-        channelId={channelId}
-        currentUser={currentUser}
-        otherUser={otherUser}
-        channelType="model-matching"
-      />
-      <UserList currentUser={currentUser} otherUser={otherUser} />
+      <div className="mb-3 flex flex-wrap items-center gap-1.5 text-xs">
+        <ChatV2StartInsightBadges channel={channel} />
+      </div>
+      {channel.activeParticipantIds.length > 0 ? (
+        <SystemMessageButton channelId={channel.id} channelType={channelType} />
+      ) : null}
+      <UserList users={channel.users} />
       <MessageList
-        channelId={channelId}
-        currentUser={currentUser}
-        otherUser={otherUser}
-        participantIds={readStatusParticipants.participantIds}
-        participantIssue={readStatusParticipants.participantIssue}
-        isParticipantResolutionLoading={
-          readStatusParticipants.isParticipantResolutionLoading
-        }
+        channelId={channel.id}
+        users={channel.users}
+        channelType={channelType}
+        participantIds={channel.participantIds}
       />
     </div>
   );

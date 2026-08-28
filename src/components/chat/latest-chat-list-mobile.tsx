@@ -3,7 +3,11 @@
 import "moment/locale/ko";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChatChannel, ChatChannelType } from "@/types/chat";
+import {
+  ChatChannel,
+  ChatChannelType,
+  isChatV2DocumentIssue
+} from "@/types/chat";
 import { Loader2, MessageSquare, User as UserIcon } from "lucide-react";
 
 import Image from "next/image";
@@ -13,6 +17,8 @@ import moment from "moment";
 import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useLatestChatChannels } from "@/hooks/use-latest-chat-channels";
 import { useRouter } from "next/navigation";
+import InvalidV2DocumentRow from "./invalid-v2-document-row";
+import LatestChatChannelBadges from "./latest-chat-channel-badges";
 
 interface LatestChatListMobileProps {
   channelType: ChatChannelType;
@@ -68,14 +74,11 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
   return (
     <div className="space-y-2">
       {data.map((channel) => {
+        if (isChatV2DocumentIssue(channel)) {
+          return <InvalidV2DocumentRow key={channel.documentId} issue={channel} />;
+        }
         const users = channel.users.slice(0, 2); // 최대 2명
         const lastMsg = channel.lastMessage;
-        const openUser: User | undefined = channel.users.find(
-          (u: User) => u.id === channel.channelOpenUserId
-        );
-        let openLabel = null;
-        if (openUser?.role === 1) openLabel = "모델이 대화시작";
-        else if (openUser?.role === 2) openLabel = "디자이너가 대화시작";
         let timeStr = "";
         if (lastMsg?.createdAt) {
           const date = lastMsg.createdAt.toDate
@@ -145,28 +148,14 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
             </div>
             {/* 아래: 메시지/시간/기타 정보 */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              {openLabel && (
-                <div className="flex items-center gap-2 mb-1">
-                  <div
-                    className={`text-xs font-semibold text-white rounded px-2 py-0.5 w-fit ${
-                      openUser?.role === 1
-                        ? "bg-blue-400"
-                        : openUser?.role === 2
-                          ? "bg-purple-500"
-                          : "bg-gray-400"
-                    }`}
-                  >
-                    {openLabel}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    주고받은 메시지수{" "}
-                    <span className="font-bold text-black">
-                      {channel.messageCount}
-                    </span>
-                    개
-                  </div>
-                </div>
-              )}
+              <div className="mb-1 text-xs text-gray-600">
+                주고받은 메시지수{" "}
+                <span className="font-bold text-black">
+                  {channel.messageCount}
+                </span>
+                개
+              </div>
+              <LatestChatChannelBadges channel={channel} />
               <div className="text-sm text-gray-900 font-medium break-all whitespace-normal w-full">
                 {lastMsg?.messageType === "image" && lastMsg.message ? (
                   <Image

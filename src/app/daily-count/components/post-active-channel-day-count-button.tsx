@@ -35,7 +35,12 @@ export default function PostActiveChannelDayCountButton() {
           {isError && <div>에러: {error?.message}</div>}
           {queryDate && !isLoading && !isError && (
             <div>
-              <b>{queryDate}</b> 생성된 채팅방 수: {data ?? 0}
+              <b>{queryDate}</b> 활성 채팅방 수: {data?.count ?? 0}
+              {(data?.invalidDocumentCount ?? 0) > 0 ? (
+                <span className="ml-2 text-amber-700">
+                  손상 문서 제외 {data?.invalidDocumentCount}건
+                </span>
+              ) : null}
             </div>
           )}
         </div>

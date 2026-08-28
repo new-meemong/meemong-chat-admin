@@ -1,9 +1,10 @@
 import { countDailyActiveChatChannelsByDate } from "@/apis/firestore/post-active-channel-daily-count";
 import { DailyCountChannelType } from "@/types/chat";
 import { useQuery } from "@tanstack/react-query";
+import type { DailyChannelCountResult } from "@/apis/firestore/daily-count-contract";
 
 interface UseDailyCountResult {
-  data: number | undefined;
+  data: DailyChannelCountResult | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -18,7 +19,7 @@ export function useDailyActiveChatChannelsCountQuery(
   dateString: string,
   channelType: DailyCountChannelType = 'model-matching'
 ): UseDailyCountResult {
-  const query = useQuery<number, Error>({
+  const query = useQuery<DailyChannelCountResult, Error>({
     queryKey: ["activeChannelDailyCount", channelType, dateString],
     queryFn: () => countDailyActiveChatChannelsByDate(dateString, channelType),
     enabled: !!dateString,

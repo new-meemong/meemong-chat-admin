@@ -8,8 +8,7 @@ import {
   query
 } from "firebase/firestore";
 
-import { CHAT_CHANNEL_COLLECTIONS } from "./constants";
-import { ChatMessageTypeEnum } from "@/types/enums";
+import { CHAT_V2_SERVICES } from "./constants";
 import { User } from "@/types/user";
 import { db } from "@/lib/firebase";
 
@@ -24,12 +23,12 @@ export async function fetchChatMessages(
   users: User[],
   channelType: ChatChannelType = "model-matching"
 ): Promise<ChatMessage[]> {
-  const collections = CHAT_CHANNEL_COLLECTIONS[channelType];
+  const { sourceCollection } = CHAT_V2_SERVICES[channelType];
 
   // 1. 해당 채널의 messages 서브컬렉션 참조 생성
   const messagesColRef = collection(
     db,
-    collections.channels,
+    sourceCollection,
     channelId,
     "messages"
   );
@@ -47,7 +46,7 @@ export async function fetchChatMessages(
     return {
       id: doc.id,
       message: data.message,
-      messageType: data.messageType as ChatMessageTypeEnum,
+      messageType: String(data.messageType ?? ""),
       metaPathList: data.metaPathList || [],
       senderId: Number(data.senderId),
       createdAt: data.createdAt as Timestamp,

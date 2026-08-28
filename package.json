@@ -6,7 +6,8 @@
     "dev": "PORT=4000 next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint src",
+    "test": "node --experimental-strip-types --test src/apis/firestore/*.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",

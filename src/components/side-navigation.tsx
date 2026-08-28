@@ -8,19 +8,19 @@ import { Menu } from "lucide-react";
 const NAVIGATION_ITEMS = [
   {
     href: "/latest-model-matching-chat-list",
-    label: "최근 모델 대화 목록(100개)"
+    label: "최근 모델 v2 대화(100개)"
   },
   {
     href: "/latest-hair-consultation-chat-list",
-    label: "최근 헤어 대화 목록(100개)"
+    label: "최근 헤어 v2 대화(100개)"
   },
   {
     href: "/latest-job-posting-chat-list",
-    label: "최근 구인 대화 목록(100개)"
+    label: "최근 구인 v2 대화(100개)"
   },
   {
     href: "/latest-review-special-chat-list",
-    label: "최근 리뷰특가 대화 목록(100개)"
+    label: "최근 리뷰특가 v2 대화(100개)"
   },
   {
     href: "/daily-count",

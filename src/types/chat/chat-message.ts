@@ -12,7 +12,6 @@ export interface ChatMessage {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   user: User | null;
-  metaPathList?: string[];
+  metaPathList?: unknown[];
 }
-
 

@@ -57,7 +57,9 @@ export const useCurrentChannelStore = create<CurrentChannelState>()(
         }))
     }),
     {
-      name: "current-channel-store",
+      // 레거시 ChatChannel을 복원하면 v2 불변 participantIds가 없어 상세가
+      // 손상되므로 저장소 키를 분리한다.
+      name: "current-v2-channel-store",
       storage: createJSONStorage(() => sessionStorage)
     }
   )
