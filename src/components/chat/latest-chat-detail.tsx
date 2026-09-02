@@ -42,12 +42,7 @@ export default function LatestChatDetail({
   useEffect(() => {
     if (!fetchedChannel) return;
 
-    const openUser =
-      fetchedChannel.users.find(
-        (user) => user.id === fetchedChannel.channelOpenUserId
-      ) ?? null;
-
-    setChannelInfo(channelType, fetchedChannel, fetchedChannel.users, openUser);
+    setChannelInfo(channelType, fetchedChannel, fetchedChannel.users);
   }, [channelType, fetchedChannel, setChannelInfo]);
 
   if (!channelId) {
@@ -93,6 +88,7 @@ export default function LatestChatDetail({
         users={users}
         channelType={channelType}
         participantIds={channel.participantIds}
+        rightAlignedUserId={channel.channelOpenUserId}
       />
     </div>
   );

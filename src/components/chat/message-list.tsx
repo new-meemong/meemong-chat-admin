@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { User } from "@/types/user";
 import { User as UserIcon } from "lucide-react";
 import { useChatMessages } from "@/hooks/use-chat-messages";
-import { useCurrentChannelStore } from "@/stores/use-current-channel-store";
 import { useRouter } from "next/navigation";
 import { ChatChannelType } from "@/types/chat";
 import { useChatReadStatus } from "@/hooks/use-chat-read-status";
@@ -16,14 +15,17 @@ interface MessageListProps {
   users: User[];
   channelType: ChatChannelType;
   /** v2 채널 생성 당시의 불변 참여자 쌍. */
-  participantIds: Array<number | string>;
+  participantIds: number[];
+  /** 이 상세 화면에서 오른쪽에 표시할 참여자 ID. */
+  rightAlignedUserId: number;
 }
 
 export default function MessageList({
   channelId,
   users,
   channelType,
-  participantIds
+  participantIds,
+  rightAlignedUserId
 }: MessageListProps) {
   const {
     data: messages,
@@ -31,9 +33,6 @@ export default function MessageList({
     isError,
     error
   } = useChatMessages(channelId, users, channelType);
-  const openUser = useCurrentChannelStore(
-    (state) => state.channels[channelType]?.openUser ?? null
-  );
   const router = useRouter();
   const { isMessageRead, readStatus } = useChatReadStatus(
     channelId,
@@ -83,11 +82,13 @@ export default function MessageList({
           const isRead =
             !isSystemMessage && isMessageRead(msg.senderId, msg.createdAt);
 
-          const isOpenUser = openUser?.id === msg.senderId;
+          const isRightAlignedUser = rightAlignedUserId === msg.senderId;
+          const senderUser =
+            users.find((user) => user.id === msg.senderId) ?? msg.user;
           // 정렬 클래스 결정
           const alignClass = isSystemMessage
             ? "justify-center"
-            : isOpenUser
+            : isRightAlignedUser
             ? "justify-end"
             : "justify-start";
 
@@ -97,7 +98,7 @@ export default function MessageList({
             bubbleStyle = "bg-red-100 text-red-700 text-center";
           } else if (isSystemSender || isSystemType || isWarningNormal) {
             bubbleStyle = "bg-gray-200 text-gray-600 text-center";
-          } else if (isOpenUser) {
+          } else if (isRightAlignedUser) {
             bubbleStyle = "bg-blue-500 text-white rounded-br-none ml-auto";
           } else {
             bubbleStyle = "bg-gray-100 text-gray-800 rounded-bl-none mr-auto";
@@ -110,21 +111,8 @@ export default function MessageList({
 
           return (
             <li key={msg.id} className={`flex w-full ${alignClass} items-end`}>
-              {/* 상대방 아바타 */}
-              {!isSystemMessage && !isOpenUser && (
-                <Avatar className="w-8 h-8 mr-2 self-end">
-                  {msg.user?.profileUrl ? (
-                    <AvatarImage src={msg.user.profileUrl} alt="avatar" />
-                  ) : null}
-                  <AvatarFallback>
-                    <UserIcon className="w-5 h-5 text-gray-400" />
-                  </AvatarFallback>
-                </Avatar>
-              )}
-
               {/* 메시지 말풍선 */}
               <div className={bubbleClass}>
-                {!isSystemMessage && null}
                 {msg.messageType === "image" ? (
                   <img
                     src={msg.message}
@@ -138,7 +126,7 @@ export default function MessageList({
                 )}
                 <div
                   className={`flex items-center justify-end gap-1.5 text-[12px] sm:text-xs mt-1 ${
-                    isOpenUser ? "text-gray-200" : "text-gray-500"
+                    isRightAlignedUser ? "text-gray-200" : "text-gray-500"
                   }`}
                 >
                   {isRead && <ReadStatusChip />}
@@ -148,11 +136,15 @@ export default function MessageList({
                 </div>
               </div>
 
-              {/* 내 아바타 */}
-              {!isSystemMessage && isOpenUser && (
-                <Avatar className="w-8 h-8 ml-2 self-end">
-                  {openUser?.profileUrl ? (
-                    <AvatarImage src={openUser.profileUrl} alt="avatar" />
+              {/* 발신자 아바타: 왼쪽 메시지는 말풍선 앞으로 순서를 바꾼다. */}
+              {!isSystemMessage && (
+                <Avatar
+                  className={`w-8 h-8 self-end ${
+                    isRightAlignedUser ? "ml-2" : "order-first mr-2"
+                  }`}
+                >
+                  {senderUser?.profileUrl ? (
+                    <AvatarImage src={senderUser.profileUrl} alt="avatar" />
                   ) : null}
                   <AvatarFallback>
                     <UserIcon className="w-5 h-5 text-gray-400" />

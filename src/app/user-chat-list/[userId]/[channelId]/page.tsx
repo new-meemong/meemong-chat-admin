@@ -69,6 +69,7 @@ export default function UserChatV2DetailPage() {
         users={channel.users}
         channelType={channelType}
         participantIds={channel.participantIds}
+        rightAlignedUserId={numericUserId}
       />
     </div>
   );

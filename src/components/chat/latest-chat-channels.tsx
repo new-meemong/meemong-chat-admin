@@ -38,12 +38,7 @@ const LatestChatChannels: React.FC<LatestChatChannelsProps> = ({
 
   const handleChannelClick = (channel: ChatChannel, users: User[]) => {
     clearChannelInfo(channelType);
-    // openUser 계산
-    const openUser: User | undefined = channel.users.find(
-      (u: User) => u.id === channel.channelOpenUserId
-    );
-
-    setChannelInfo(channelType, channel, users, openUser ?? null);
+    setChannelInfo(channelType, channel, users);
     router.push(`/latest-${channelType}-chat-list/${channel.id}`);
   };
 

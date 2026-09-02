@@ -38,10 +38,7 @@ const LatestChatListMobile: React.FC<LatestChatListMobileProps> = ({
 
   const handleChannelClick = (channel: ChatChannel, users: User[]) => {
     clearChannelInfo(channelType);
-    const openUser: User | undefined = channel.users.find(
-      (u: User) => u.id === channel.channelOpenUserId
-    );
-    setChannelInfo(channelType, channel, users, openUser ?? null);
+    setChannelInfo(channelType, channel, users);
     router.push(`/latest-${channelType}-chat-list/${channel.id}`);
   };
 

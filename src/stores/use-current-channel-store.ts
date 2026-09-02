@@ -10,7 +10,6 @@ import { create } from "zustand";
 interface ChannelInfo {
   channel: ChatChannel | null;
   users: User[];
-  openUser: User | null;
 }
 
 /**
@@ -24,8 +23,7 @@ interface CurrentChannelState {
   setChannelInfo: (
     type: ChatChannelType,
     channel: ChatChannel,
-    users: User[],
-    openUser: User | null
+    users: User[]
   ) => void;
   getChannelInfo: (type: ChatChannelType) => ChannelInfo | null;
   clearChannelInfo: (type: ChatChannelType) => void;
@@ -40,11 +38,11 @@ export const useCurrentChannelStore = create<CurrentChannelState>()(
         "job-posting": null,
         "review-special": null
       },
-      setChannelInfo: (type, channel, users, openUser) =>
+      setChannelInfo: (type, channel, users) =>
         set((state) => ({
           channels: {
             ...state.channels,
-            [type]: { channel, users, openUser }
+            [type]: { channel, users }
           }
         })),
       getChannelInfo: (type) => get().channels[type],

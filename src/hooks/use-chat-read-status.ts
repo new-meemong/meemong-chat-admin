@@ -112,7 +112,7 @@ function clearUserReadStatus(current: ReadState, userId: string) {
 export function useChatReadStatus(
   channelId: string,
   channelType: ChatChannelType,
-  participantIds: Array<number | string>
+  participantIds: readonly number[]
 ) {
   const participantKey = useMemo(
     () => normalizeChatParticipantIds(participantIds).join(","),
