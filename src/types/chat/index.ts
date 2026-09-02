@@ -7,6 +7,7 @@ export type {
   DailyCountChannelType
 } from "./channel-type";
 export type { ChatChannel } from "./chat-channel";
+export type { LegacyModelMatchingChatChannel } from "./legacy-model-matching-chat-channel";
 export type { LatestChatChannel } from "./latest-chat-channel";
 export type { ChatMessage } from "./chat-message";
 export type {

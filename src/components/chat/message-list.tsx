@@ -18,6 +18,8 @@ interface MessageListProps {
   participantIds: number[];
   /** 이 상세 화면에서 오른쪽에 표시할 참여자 ID. */
   rightAlignedUserId: number;
+  /** 레거시 읽기 전용 화면에서는 v2 읽음 메타를 조회하지 않는다. */
+  readStatusEnabled?: boolean;
 }
 
 export default function MessageList({
@@ -25,7 +27,8 @@ export default function MessageList({
   users,
   channelType,
   participantIds,
-  rightAlignedUserId
+  rightAlignedUserId,
+  readStatusEnabled = true
 }: MessageListProps) {
   const {
     data: messages,
@@ -35,11 +38,13 @@ export default function MessageList({
   } = useChatMessages(channelId, users, channelType);
   const router = useRouter();
   const { isMessageRead, readStatus } = useChatReadStatus(
-    channelId,
+    readStatusEnabled ? channelId : "",
     channelType,
-    participantIds
+    readStatusEnabled ? participantIds : []
   );
-  const readStatusNotice = <ReadStatusNotice readStatus={readStatus} />;
+  const readStatusNotice = readStatusEnabled ? (
+    <ReadStatusNotice readStatus={readStatus} />
+  ) : null;
 
   // 이미지 모달 상태 추가
   const [modalImage, setModalImage] = useState<string | null>(null);
@@ -80,7 +85,9 @@ export default function MessageList({
             isWarningNormal ||
             isWarningStrong;
           const isRead =
-            !isSystemMessage && isMessageRead(msg.senderId, msg.createdAt);
+            readStatusEnabled &&
+            !isSystemMessage &&
+            isMessageRead(msg.senderId, msg.createdAt);
 
           const isRightAlignedUser = rightAlignedUserId === msg.senderId;
           const senderUser =
