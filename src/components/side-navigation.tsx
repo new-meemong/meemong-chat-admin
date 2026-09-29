@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 
 const NAVIGATION_ITEMS = [
+  { href: "/chat-journey-dashboard", label: "채팅 시작 경로" },
   {
     href: "/latest-model-matching-chat-list",
     label: "최근 모델 v2 대화(100개)"
