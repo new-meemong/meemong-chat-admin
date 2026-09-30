@@ -22,6 +22,21 @@ test('weekly cohorts sum counts rather than daily percentages and retain drilldo
 });
 
 import { routeLabel } from './chat-journey-labels.ts';
+test('profiles opened from a chat room identify the room as their origin', () => {
+  assert.equal(routeLabel('chat_room>designer_profile'), '채팅방 → 디자이너 프로필');
+  assert.equal(routeLabel('chat_room>model_profile'), '채팅방 → 고객 프로필');
+});
+
+test('additional profile entries retain their known source labels', () => {
+  assert.equal(routeLabel('received_chat>hairConsultation>model_profile'), '받은 채팅 → 헤어컨설팅 → 고객 프로필');
+  assert.equal(routeLabel('received_chat>modelMatching>model_profile'), '받은 채팅 → 모델모집 → 고객 프로필');
+  assert.equal(routeLabel('quick_matching_list>quick_matching_detail>chat_start_sheet>model_profile'), '빠른매칭 목록 → 빠른매칭 상세 → 문의 확인창 → 고객 프로필');
+  assert.equal(routeLabel('chat_room>reviewSpecial>designer_profile'), '채팅방 → 리뷰특가 → 디자이너 프로필');
+  assert.equal(routeLabel('blocked_users>model_profile'), '차단 관리 → 고객 프로필');
+  assert.equal(routeLabel('unknown>designer_profile>menu_detail'), '출처 확인 불가 → 디자이너 프로필 → 메뉴 상세');
+  assert.equal(routeLabel('designer_search>omitted_steps>designer_profile'), '디자이너 검색 → 중간 경로 일부 생략 → 디자이너 프로필');
+});
+
 test('existing room visits distinguish list, push and notification inbox', () => {
   assert.equal(routeLabel('existing_chat>chat_list'), '기존 채팅 다시 열기 → 채팅 목록');
   assert.equal(routeLabel('existing_chat>push'), '기존 채팅 다시 열기 → 푸시');

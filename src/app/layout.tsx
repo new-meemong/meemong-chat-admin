@@ -35,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex">
             <SideNavigation />
-            <main className="flex-1 p-2 md:p-8 md:ml-64">{children}</main>
+            <main className="min-w-0 flex-1 p-2 md:p-8 md:ml-64">{children}</main>
           </div>
           <Toaster position="top-center" />
         </Providers>
